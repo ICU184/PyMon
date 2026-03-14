@@ -201,10 +201,13 @@ class EVEAuth:
         # EVE SSO tokens contain both "EVE Online" and the client_id in the
         # audience list.  PyJWT's ``audience`` check succeeds when *any* of
         # the expected values is present, so passing "EVE Online" is enough.
+        # Pass the PyJWK object directly so PyJWT auto-detects the correct
+        # algorithm from the key metadata.  CCP publishes both an RSA
+        # (RS256) and an EC (ES256) key in JWKS and may sign with either.
         payload = jwt.decode(
             access_token,
-            signing_key.key,
-            algorithms=["RS256"],
+            signing_key,
+            algorithms=["RS256", "ES256"],
             audience="EVE Online",
             issuer=self.ACCEPTED_ISSUERS,
         )

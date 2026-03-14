@@ -740,12 +740,16 @@ class MainWindow(QMainWindow):
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
                 server = CallbackServer()
+                logger.info("Waiting for SSO callback on port 8182...")
                 callback_result = loop.run_until_complete(server.wait_for_callback())
+                logger.info("SSO callback received, exchanging code...")
                 sso_result = loop.run_until_complete(
                     self.auth.exchange_code(callback_result.code, callback_result.state)
                 )
+                logger.info("SSO login successful for %s", sso_result.character_name)
                 self.sso_login_finished.emit(sso_result)
             except Exception as e:
+                logger.error("SSO login failed", exc_info=True)
                 self.sso_login_failed.emit(str(e))
 
         thread = threading.Thread(target=_run_callback_server, daemon=True)
