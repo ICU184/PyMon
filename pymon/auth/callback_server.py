@@ -91,6 +91,7 @@ class CallbackServer:
             host="127.0.0.1",
             port=SSO_CALLBACK_PORT,
             log_level="warning",
+            log_config=None,  # Disable uvicorn's logging config (fails in PyInstaller)
         )
         server = uvicorn.Server(config)
 
