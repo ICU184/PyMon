@@ -53,4 +53,4 @@ Desktop.ini
 
 # ── PyInstaller ──────────────────────────────────────────────
 *.exe
-pymon.spec
+# pymon.spec wird für den CI/CD Build benötigt – NICHT ignorieren
