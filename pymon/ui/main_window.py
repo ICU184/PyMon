@@ -575,6 +575,13 @@ class MainWindow(QMainWindow):
 
         # Help menu
         help_menu = menu_bar.addMenu("&Hilfe")
+
+        setup_wizard_action = QAction("🔧 &Einrichtungsassistent...", self)
+        setup_wizard_action.triggered.connect(self._on_setup_wizard)
+        help_menu.addAction(setup_wizard_action)
+
+        help_menu.addSeparator()
+
         about_action = QAction("Über &PyMon", self)
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
@@ -3573,6 +3580,13 @@ class MainWindow(QMainWindow):
             "<p>API: <a href='https://esi.evetech.net'>ESI (EVE Swagger Interface)</a></p>"
             "<p>Lizenz: GPL v2</p>",
         )
+
+    def _on_setup_wizard(self) -> None:
+        """Re-launch the first-run setup wizard from the Help menu."""
+        from pymon.ui.setup_wizard import SetupWizard
+
+        wizard = SetupWizard(self.config, parent=self)
+        wizard.exec()
 
     # ══════════════════════════════════════════════════════════════════
     #  LIFECYCLE

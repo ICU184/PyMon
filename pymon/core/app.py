@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import logging
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QDialog
 
 from pymon.core.config import Config
 from pymon.core.database import Database
 from pymon.ui.dark_theme import apply_theme
 from pymon.ui.main_window import MainWindow
+from pymon.ui.setup_wizard import SetupWizard
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,16 @@ class PyMonApp:
         logger.info("Starting PyMon v%s", self.qt_app.applicationVersion())
 
         self.db.initialize()
+
+        # Show setup wizard on first run (no Client ID configured)
+        if not self.config.client_id:
+            logger.info("No Client ID configured – launching setup wizard")
+            wizard = SetupWizard(self.config)
+            if wizard.exec() != QDialog.DialogCode.Accepted:
+                logger.info("Setup wizard cancelled by user")
+                # Allow app to start without client_id – features will be limited
+                if not self.config.client_id:
+                    logger.warning("Continuing without Client ID – ESI features disabled")
 
         self.main_window = MainWindow(self.config, self.db)
         self.main_window.show()
