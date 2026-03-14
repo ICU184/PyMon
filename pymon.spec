@@ -1,12 +1,18 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller spec file for PyMon."""
 
+import certifi
+
 a = Analysis(
     ['pymon/__main__.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        # certifi CA bundle – needed for HTTPS in frozen builds
+        (certifi.where(), 'certifi'),
+    ],
     hiddenimports=[
+        # ── PyMon sub-packages ──
         'pymon.api',
         'pymon.auth',
         'pymon.core',
@@ -14,8 +20,50 @@ a = Analysis(
         'pymon.sde',
         'pymon.services',
         'pymon.ui',
+        # ── Qt extras ──
         'PySide6.QtSvg',
         'PySide6.QtSvgWidgets',
+        # ── HTTP / SSO / JWT ──
+        'httpx',
+        'httpx._transports',
+        'httpx._transports.default',
+        'httpcore',
+        'httpcore._async',
+        'httpcore._sync',
+        'h11',
+        'anyio',
+        'anyio._backends',
+        'anyio._backends._asyncio',
+        'certifi',
+        'idna',
+        'jwt',
+        'jwt.algorithms',
+        'jwt.api_jwt',
+        'jwt.api_jws',
+        'jwt.jwks_client',
+        # ── Callback server (uvicorn + starlette) ──
+        'uvicorn',
+        'uvicorn.config',
+        'uvicorn.server',
+        'uvicorn.main',
+        'uvicorn.loops',
+        'uvicorn.loops.auto',
+        'uvicorn.loops.asyncio',
+        'uvicorn.protocols',
+        'uvicorn.protocols.http',
+        'uvicorn.protocols.http.auto',
+        'uvicorn.protocols.http.h11_impl',
+        'uvicorn.lifespan',
+        'uvicorn.lifespan.on',
+        'uvicorn.lifespan.off',
+        'uvicorn.logging',
+        'starlette',
+        'starlette.applications',
+        'starlette.requests',
+        'starlette.responses',
+        'starlette.routing',
+        'starlette.types',
+        'starlette.datastructures',
     ],
     hookspath=[],
     hooksconfig={},
