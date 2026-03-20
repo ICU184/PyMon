@@ -73,7 +73,7 @@ class SkillPlannerWidget(QWidget):
         self._character_id: int | None = None
 
         # Current plan
-        self._plan = SkillPlan(name="Neuer Plan")
+        self._plan = SkillPlan(name="New Plan")
         self._plan_dirty = False  # unsaved changes?
 
         self._setup_ui()
@@ -140,7 +140,7 @@ class SkillPlannerWidget(QWidget):
         # Skill details (always visible above tabs)
         self.detail_group = QGroupBox("Skill Details")
         detail_layout = QVBoxLayout(self.detail_group)
-        self.detail_label = QLabel("Wähle einen Skill aus der Liste links.")
+        self.detail_label = QLabel("Select a skill from the list on the left.")
         self.detail_label.setWordWrap(True)
         self.detail_label.setTextFormat(Qt.TextFormat.RichText)
         detail_layout.addWidget(self.detail_label)
@@ -148,7 +148,7 @@ class SkillPlannerWidget(QWidget):
         # Add-to-plan buttons
         btn_layout = QHBoxLayout()
         for level in range(1, 6):
-            btn = QPushButton(f"Level {level} zum Plan")
+            btn = QPushButton(f"Add Level {level} to plan")
             btn.clicked.connect(partial(self._add_to_plan, level))
             btn_layout.addWidget(btn)
         detail_layout.addLayout(btn_layout)
@@ -168,22 +168,22 @@ class SkillPlannerWidget(QWidget):
         self.plan_combo = QComboBox()
         self.plan_combo.setMinimumWidth(180)
         self.plan_combo.setEditable(False)
-        self.plan_combo.addItem("Neuer Plan")
+        self.plan_combo.addItem("New Plan")
         self.plan_combo.currentTextChanged.connect(self._on_plan_selected)
         plan_selector.addWidget(self.plan_combo, stretch=1)
 
-        self.new_plan_btn = QPushButton("➕ Neu")
-        self.new_plan_btn.setToolTip("Neuen Plan erstellen")
+        self.new_plan_btn = QPushButton("➕ New")
+        self.new_plan_btn.setToolTip("Create new plan")
         self.new_plan_btn.clicked.connect(self._new_plan)
         plan_selector.addWidget(self.new_plan_btn)
 
-        self.save_plan_btn = QPushButton("💾 Speichern")
-        self.save_plan_btn.setToolTip("Plan in DB speichern")
+        self.save_plan_btn = QPushButton("💾 Save")
+        self.save_plan_btn.setToolTip("Save plan to DB")
         self.save_plan_btn.clicked.connect(self._save_plan)
         plan_selector.addWidget(self.save_plan_btn)
 
-        self.delete_plan_btn = QPushButton("🗑️ Löschen")
-        self.delete_plan_btn.setToolTip("Plan aus DB löschen")
+        self.delete_plan_btn = QPushButton("🗑️ Delete")
+        self.delete_plan_btn.setToolTip("Delete plan from DB")
         self.delete_plan_btn.clicked.connect(self._delete_plan)
         plan_selector.addWidget(self.delete_plan_btn)
 
@@ -203,7 +203,7 @@ class SkillPlannerWidget(QWidget):
         # Plan tree
         self.plan_tree = QTreeWidget()
         self.plan_tree.setHeaderLabels([
-            "Skill", "Level", "Trainingszeit", "Kumuliert", "Status"
+            "Skill", "Level", "Training Time", "Cumulative", "Status"
         ])
         self.plan_tree.setAlternatingRowColors(True)
         self.plan_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
@@ -211,7 +211,7 @@ class SkillPlannerWidget(QWidget):
 
         # Plan buttons
         plan_btns = QHBoxLayout()
-        self.remove_btn = QPushButton("Entfernen")
+        self.remove_btn = QPushButton("Remove")
         self.remove_btn.clicked.connect(self._remove_from_plan)
         plan_btns.addWidget(self.remove_btn)
         self.move_up_btn = QPushButton("↑")
@@ -220,24 +220,24 @@ class SkillPlannerWidget(QWidget):
         self.move_down_btn = QPushButton("↓")
         self.move_down_btn.clicked.connect(self._move_down)
         plan_btns.addWidget(self.move_down_btn)
-        self.clear_btn = QPushButton("Plan leeren")
+        self.clear_btn = QPushButton("Clear plan")
         self.clear_btn.clicked.connect(self._clear_plan)
         plan_btns.addWidget(self.clear_btn)
         plan_btns.addStretch()
         self.export_btn = QPushButton("📤 Export")
-        self.export_btn.setToolTip("Plan als JSON exportieren")
+        self.export_btn.setToolTip("Export plan as JSON")
         self.export_btn.clicked.connect(self._export_plan)
         plan_btns.addWidget(self.export_btn)
         self.import_btn = QPushButton("📥 Import")
-        self.import_btn.setToolTip("Plan aus JSON importieren")
+        self.import_btn.setToolTip("Import plan from JSON")
         self.import_btn.clicked.connect(self._import_plan)
         plan_btns.addWidget(self.import_btn)
         self.eft_import_btn = QPushButton("🚀 EFT Import")
-        self.eft_import_btn.setToolTip("Fitting (EFT-Format) importieren → benötigte Skills")
+        self.eft_import_btn.setToolTip("Import fitting (EFT format) → required skills")
         self.eft_import_btn.clicked.connect(self._import_eft)
         plan_btns.addWidget(self.eft_import_btn)
-        self.print_btn = QPushButton("🖨️ Drucken")
-        self.print_btn.setToolTip("Plan drucken oder als PDF speichern")
+        self.print_btn = QPushButton("🖨️ Print")
+        self.print_btn.setToolTip("Print plan or save as PDF")
         self.print_btn.clicked.connect(self._print_plan)
         plan_btns.addWidget(self.print_btn)
         plan_group_layout.addLayout(plan_btns)
@@ -246,7 +246,7 @@ class SkillPlannerWidget(QWidget):
 
         # ── Tab 2: Attribute Optimizer ──
         self.attr_optimizer = AttributeOptimizerWidget(self.planner)
-        self.right_tabs.addTab(self.attr_optimizer, "🧠 Attribut-Optimierer")
+        self.right_tabs.addTab(self.attr_optimizer, "🧠 Attribute Optimizer")
 
         right_layout.addWidget(self.right_tabs, stretch=1)
         splitter.addWidget(right)
@@ -347,18 +347,18 @@ class SkillPlannerWidget(QWidget):
         bars = "●" * current_level + "○" * (5 - current_level)
 
         html = f"<h3>{info.name}</h3>"
-        html += f"<p>Rang: {int(info.rank)} | Primary: {info.primary_attr.title()} | Secondary: {info.secondary_attr.title()}</p>"
-        html += f"<p>Trainiert: <b>{bars}</b> (Level {current_level})</p>"
+        html += f"<p>Rank: {int(info.rank)} | Primary: {info.primary_attr.title()} | Secondary: {info.secondary_attr.title()}</p>"
+        html += f"<p>Trained: <b>{bars}</b> (Level {current_level})</p>"
 
         if info.description:
             desc = info.description[:300]
             html += f"<p style='color:{Colors.TEXT_DIM}'>{desc}</p>"
 
         # Training times per level
-        html += "<h4>Trainingszeiten</h4><table cellspacing='4'>"
+        html += "<h4>Training Times</h4><table cellspacing='4'>"
         for lvl in range(1, 6):
             if lvl <= current_level:
-                html += f"<tr><td>Level {lvl}:</td><td style='color:{Colors.ACCENT}'>✓ Trainiert</td></tr>"
+                html += f"<tr><td>Level {lvl}:</td><td style='color:{Colors.ACCENT}'>✓ Trained</td></tr>"
             else:
                 t = self.planner.calculate_training_time(
                     type_id, max(current_level, lvl - 1), lvl, self._attributes
@@ -369,7 +369,7 @@ class SkillPlannerWidget(QWidget):
         # Prerequisites
         prereqs = self.planner.get_prerequisites_tree(type_id)
         if prereqs:
-            html += "<h4>Voraussetzungen</h4><ul>"
+            html += "<h4>Prerequisites</h4><ul>"
             for pid, pname, plevel in prereqs:
                 trained = self._trained_skills.get(pid, 0)
                 icon = "✓" if trained >= plevel else "✗"
@@ -384,7 +384,7 @@ class SkillPlannerWidget(QWidget):
                 # Group by category
                 by_cat: dict[str, list] = {}
                 for item_data in unlocked:
-                    cat = item_data.get("category_name") or "Unbekannt"
+                    cat = item_data.get("category_name") or "Unknown"
                     by_cat.setdefault(cat, []).append(item_data)
 
                 cat_icons = {
@@ -395,7 +395,7 @@ class SkillPlannerWidget(QWidget):
                     "Starbase": "🛸",
                 }
 
-                html += f"<h4>🔓 Ermöglicht ({len(unlocked)} Items)</h4>"
+                html += f"<h4>🔓 Enables ({len(unlocked)} items)</h4>"
                 for cat_name in sorted(by_cat):
                     items_in_cat = by_cat[cat_name]
                     icon = cat_icons.get(cat_name, "📦")
@@ -411,7 +411,7 @@ class SkillPlannerWidget(QWidget):
                             f" <span style='color:{Colors.BLUE}'>Lvl {lvl_roman}</span></li>"
                         )
                     if len(items_in_cat) > 15:
-                        html += f"<li style='color:{Colors.TEXT_DIM}'><i>...und {len(items_in_cat) - 15} weitere</i></li>"
+                        html += f"<li style='color:{Colors.TEXT_DIM}'><i>...and {len(items_in_cat) - 15} more</i></li>"
                     html += "</ul>"
         except Exception:
             pass  # SDE Explorer is optional
@@ -528,8 +528,8 @@ class SkillPlannerWidget(QWidget):
         """Clear the entire plan."""
         if self._plan.entries:
             reply = QMessageBox.question(
-                self, "Plan leeren",
-                f"Alle {len(self._plan.entries)} Einträge aus dem Plan entfernen?"
+                self, "Clear plan",
+                f"Remove all {len(self._plan.entries)} entries from the plan?"
             )
             if reply != QMessageBox.StandardButton.Yes:
                 return
@@ -560,9 +560,9 @@ class SkillPlannerWidget(QWidget):
 
             status = ""
             if entry.current_level >= entry.target_level:
-                status = "✓ Trainiert"
+                status = "✓ Trained"
             elif entry.training_time_seconds <= 0:
-                status = "✓ Fertig"
+                status = "✓ Done"
 
             item = QTreeWidgetItem([
                 entry.skill_name,
@@ -579,7 +579,7 @@ class SkillPlannerWidget(QWidget):
 
         # Update total
         total = self._plan.total_time_display
-        self.plan_total_label.setText(f"Gesamt: {total} ({len(self._plan.entries)} Skills)")
+        self.plan_total_label.setText(f"Total: {total} ({len(self._plan.entries)} skills)")
 
         # Sync plan to Attribute Optimizer
         self.attr_optimizer.set_plan(self._plan)
@@ -798,8 +798,8 @@ class SkillPlannerWidget(QWidget):
     def _import_plan(self) -> None:
         """Import a plan from a JSON file."""
         path, _ = QFileDialog.getOpenFileName(
-            self, "Plan importieren", "",
-            "JSON Dateien (*.json);;Alle Dateien (*)",
+            self, "Import plan", "",
+            "JSON Files (*.json);;All Files (*)",
         )
         if not path:
             return
@@ -809,22 +809,22 @@ class SkillPlannerWidget(QWidget):
             data = json.loads(text)
         except Exception as exc:
             QMessageBox.critical(
-                self, "Import-Fehler", f"Datei konnte nicht gelesen werden:\n{exc}"
+                self, "Import Error", f"Could not read file:\n{exc}"
             )
             return
 
         # Validate format
         if not isinstance(data, dict) or "entries" not in data:
             QMessageBox.critical(
-                self, "Import-Fehler",
-                "Ungültiges Dateiformat. Erwartet: PyMon Skill Plan JSON.",
+                self, "Import Error",
+                "Invalid file format. Expected: PyMon Skill Plan JSON.",
             )
             return
 
         entries_data = data["entries"]
         if not isinstance(entries_data, list):
             QMessageBox.critical(
-                self, "Import-Fehler", "Ungültige Einträge im Plan."
+                self, "Import Error", "Invalid entries in plan."
             )
             return
 
@@ -833,9 +833,9 @@ class SkillPlannerWidget(QWidget):
         # Ask if should replace or merge
         if self._plan.entries:
             reply = QMessageBox.question(
-                self, "Plan importieren",
-                f"Plan '{plan_name}' mit {len(entries_data)} Skills importieren?\n\n"
-                "Der aktuelle Plan wird ersetzt.",
+                self, "Import plan",
+                f"Import plan '{plan_name}' with {len(entries_data)} skills?\n\n"
+                "Current plan will be replaced.",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
             )
             if reply != QMessageBox.StandardButton.Yes:
@@ -867,13 +867,13 @@ class SkillPlannerWidget(QWidget):
 
         QMessageBox.information(
             self, "Import",
-            f"Plan '{plan_name}' mit {len(self._plan.entries)} Skills importiert.",
+            f"Plan '{plan_name}' with {len(self._plan.entries)} skills imported.",
         )
 
     def _print_plan(self) -> None:
         """Print current skill plan or save as PDF."""
         if not self._plan.entries:
-            QMessageBox.information(self, "Drucken", "Der Plan ist leer.")
+            QMessageBox.information(self, "Print", "The plan is empty.")
             return
 
         from PySide6.QtPrintSupport import QPrinter, QPrintPreviewDialog
@@ -882,7 +882,7 @@ class SkillPlannerWidget(QWidget):
         printer.setPageOrientation(QPrinter.Orientation.Portrait)
 
         dialog = QPrintPreviewDialog(printer, self)
-        dialog.setWindowTitle(f"Plan drucken: {self._plan.name}")
+        dialog.setWindowTitle(f"Print plan: {self._plan.name}")
         dialog.paintRequested.connect(lambda p: self._render_plan_html(p))
         dialog.exec()
 
@@ -912,14 +912,14 @@ class SkillPlannerWidget(QWidget):
         )
 
         html += f"<h1>Skill Plan: {self._plan.name}</h1>"
-        html += f"<h3>{len(self._plan.entries)} Skills | Gesamt: {self._plan.total_display}</h3>"
+        html += f"<h3>{len(self._plan.entries)} Skills | Total: {self._plan.total_display}</h3>"
 
-        html += f"<p style='color:#777'>Erstellt: {datetime.now(UTC):%Y-%m-%d %H:%M} UTC</p>"
+        html += f"<p style='color:#777'>Created: {datetime.now(UTC):%Y-%m-%d %H:%M} UTC</p>"
 
         html += (
             "<table>"
             "<tr><th>#</th><th>Skill</th><th>Level</th>"
-            "<th>Trainingszeit</th><th>Kumuliert</th><th>Status</th></tr>"
+            "<th>Training time</th><th>Cumulative</th><th>Status</th></tr>"
         )
 
         cumulative = 0
@@ -930,7 +930,7 @@ class SkillPlannerWidget(QWidget):
 
             current = self._trained_skills.get(entry.type_id, 0)
             if current >= entry.target_level:
-                status = "<span class='trained'>✓ Trainiert</span>"
+                status = "<span class='trained'>✓ Trained</span>"
             else:
                 status = f"<span class='needed'>L{current} → L{entry.target_level}</span>"
 
@@ -987,10 +987,10 @@ class SkillPlannerWidget(QWidget):
             self._update_plan_tree()
             QMessageBox.information(
                 self, "EFT Import",
-                f"{added} fehlende Skills zum Plan hinzugefügt.",
+                f"{added} missing skills added to plan.",
             )
         else:
             QMessageBox.information(
                 self, "EFT Import",
-                "Alle benötigten Skills sind bereits trainiert oder im Plan.",
+                "All required skills are already trained or in the plan.",
             )

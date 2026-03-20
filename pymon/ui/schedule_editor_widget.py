@@ -30,7 +30,7 @@ from pymon.ui.dark_theme import Colors
 
 logger = logging.getLogger(__name__)
 
-DAYS = ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"]
+DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
 HOURS = [f"{h:02d}:00" for h in range(24)]
 
 # Colors
@@ -74,23 +74,23 @@ class ScheduleEditorWidget(QWidget):
         layout.setContentsMargins(8, 8, 8, 8)
 
         # Title
-        title = QLabel("<h3>📅 Wochenplaner – Trainingszeiten</h3>")
+        title = QLabel("<h3>📅 Weekly Planner – Training Times</h3>")
         title.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(title)
 
         # Legend
         legend = QHBoxLayout()
         legend.addWidget(self._make_legend_item("🟢 Online/Training", COLOR_ONLINE))
-        legend.addWidget(self._make_legend_item("🔴 Offline/Abwesend", COLOR_OFFLINE))
-        legend.addWidget(self._make_legend_item("⬛ Nicht gesetzt", COLOR_EMPTY))
+        legend.addWidget(self._make_legend_item("🔴 Offline/Away", COLOR_OFFLINE))
+        legend.addWidget(self._make_legend_item("⬛ Not Set", COLOR_EMPTY))
         legend.addStretch()
         layout.addLayout(legend)
 
         # Instructions
         info = QLabel(
-            "<p style='color:{Colors.TEXT_DIM}'>Klicke auf Zellen, um Online/Offline-Zeiten zu markieren. "
-            "Linksklick = Online (grün), Rechtsklick = Offline (rot). "
-            "Mit gedrückter Maustaste über Zellen ziehen zum Markieren mehrerer Stunden.</p>"
+            "<p style='color:{Colors.TEXT_DIM}'>Click on cells to mark Online/Offline times. "
+            "Left click = Online (green), Right click = Offline (red). "
+            "Click and drag across cells to mark multiple hours.</p>"
         )
         info.setWordWrap(True)
         info.setTextFormat(Qt.TextFormat.RichText)
@@ -123,24 +123,24 @@ class ScheduleEditorWidget(QWidget):
         # Buttons
         btn_layout = QHBoxLayout()
 
-        all_online_btn = QPushButton("Alles Online")
-        all_online_btn.setToolTip("Alle Zeitfenster als Online markieren")
+        all_online_btn = QPushButton("All Online")
+        all_online_btn.setToolTip("Mark all time slots as Online")
         all_online_btn.clicked.connect(self._set_all_online)
         btn_layout.addWidget(all_online_btn)
 
-        weekday_btn = QPushButton("Werktage 9-17h Offline")
-        weekday_btn.setToolTip("Standard-Arbeitszeitplan setzen")
+        weekday_btn = QPushButton("Weekdays 9-17h Offline")
+        weekday_btn.setToolTip("Set standard work schedule")
         weekday_btn.clicked.connect(self._set_work_schedule)
         btn_layout.addWidget(weekday_btn)
 
-        clear_btn = QPushButton("Zurücksetzen")
-        clear_btn.setToolTip("Gesamten Plan leeren")
+        clear_btn = QPushButton("Reset")
+        clear_btn.setToolTip("Clear entire schedule")
         clear_btn.clicked.connect(self._clear_schedule)
         btn_layout.addWidget(clear_btn)
 
         btn_layout.addStretch()
 
-        save_btn = QPushButton("💾 Speichern")
+        save_btn = QPushButton("💾 Save")
         save_btn.clicked.connect(self._save_schedule)
         btn_layout.addWidget(save_btn)
 
@@ -228,9 +228,9 @@ class ScheduleEditorWidget(QWidget):
 
         self.summary_label.setText(
             f"<p>"
-            f"<span style='color:{Colors.ACCENT}'>🟢 Online: {online_h}h/Woche ({pct_online:.0f}%)</span>"
+            f"<span style='color:{Colors.ACCENT}'>🟢 Online: {online_h}h/week ({pct_online:.0f}%)</span>"
             f" | <span style='color:{Colors.RED}'>🔴 Offline: {offline_h}h</span>"
-            f" | <span style='color:{Colors.TEXT_DIM}'>Nicht gesetzt: {unset_h}h</span>"
+            f" | <span style='color:{Colors.TEXT_DIM}'>Not Set: {unset_h}h</span>"
             f"</p>"
         )
 
@@ -260,8 +260,8 @@ class ScheduleEditorWidget(QWidget):
         """Save schedule to database."""
         if not self._db or not self._character_id:
             QMessageBox.information(
-                self, "Speichern",
-                "Kein Charakter ausgewählt.",
+                self, "Save",
+                "No character selected.",
             )
             return
         try:
@@ -272,9 +272,9 @@ class ScheduleEditorWidget(QWidget):
             )
             self._db.conn.commit()
             self.schedule_changed.emit()
-            QMessageBox.information(self, "Gespeichert", "Wochenplan gespeichert ✓")
+            QMessageBox.information(self, "Saved", "Weekly schedule saved ✓")
         except Exception as e:
-            QMessageBox.critical(self, "Fehler", f"Speichern fehlgeschlagen:\n{e}")
+            QMessageBox.critical(self, "Error", f"Save failed:\n{e}")
 
     def _load_schedule(self) -> None:
         """Load schedule from database."""

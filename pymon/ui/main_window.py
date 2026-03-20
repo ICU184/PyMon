@@ -307,29 +307,29 @@ class MainWindow(QMainWindow):
 
         # ── Sidebar navigation (grouped tabs) ──
         self._tab_groups_def = [
-            TabGroup("character", "Charakter", "👤", [
-                "Übersicht", "Klone", "Kontakte", "Medaillen",
-                "Lesezeichen", "Kalender", "LP", "FW Stats",
+            TabGroup("character", "Character", "👤", [
+                "Overview", "Clones", "Contacts", "Medals",
+                "Bookmarks", "Calendar", "LP", "FW Stats",
             ]),
             TabGroup("skills", "Skills", "📊", [
                 "Skill Queue", "Skills", "Skill Planner",
-                "Zertifikate", "Wochenplaner",
+                "Certificates", "Weekly Planner",
             ]),
-            TabGroup("finance", "Finanzen", "💰", [
-                "Wallet", "Markt", "Marktbrowser", "Trade Tracker",
-                "Handelsberater", "Contracts", "Mining", "ISK Chart",
+            TabGroup("finance", "Finance", "💰", [
+                "Wallet", "Market", "Market Browser", "Trade Tracker",
+                "Trade Advisor", "Contracts", "Mining", "ISK Chart",
             ]),
-            TabGroup("industry", "Industrie", "🏭", [
-                "Industrie", "Blueprints", "Fittings",
+            TabGroup("industry", "Industry", "🏭", [
+                "Industry", "Blueprints", "Fittings",
                 "Assets", "Research",
             ]),
-            TabGroup("combat", "Kampf & Sozial", "⚔️", [
-                "Killmails", "Mail", "Benachrichtigungen",
+            TabGroup("combat", "Combat & Social", "⚔️", [
+                "Killmails", "Mail", "Notifications",
                 "PI",
             ]),
-            TabGroup("tools", "Tools & Analyse", "🔧", [
-                "Implant Calc", "Char-Vergleich", "SP Chart",
-                "Skill Books", "Datenbrowser", "API Tester",
+            TabGroup("tools", "Tools & Analysis", "🔧", [
+                "Implant Calc", "Char Comparison", "SP Chart",
+                "Skill Books", "Data Browser", "API Tester",
                 "Ship Browser", "Path Finder",
             ]),
         ]
@@ -365,27 +365,27 @@ class MainWindow(QMainWindow):
             return label
 
         # ── Create all label-based tabs ──
-        self.overview_label = _make_tab("Wähle einen Charakter oder füge einen neuen hinzu.", "Übersicht")
-        self.skill_queue_label = _make_tab("Skill Queue wird geladen...", "Skill Queue")
-        self.skills_label = _make_tab("Skills werden geladen...", "Skills")
+        self.overview_label = _make_tab("Select a character or add a new one.", "Overview")
+        self.skill_queue_label = _make_tab("Loading Skill Queue...", "Skill Queue")
+        self.skills_label = _make_tab("Loading Skills...", "Skills")
         self.mail_label = _make_tab("", "Mail")
         self.wallet_label = _make_tab("", "Wallet")
         self.assets_label = _make_tab("", "Assets")
         self.contracts_label = _make_tab("", "Contracts")
         self.contracts_label.linkActivated.connect(self._on_contract_link)
-        self.industry_label = _make_tab("", "Industrie")
-        self.market_label = _make_tab("", "Markt")
+        self.industry_label = _make_tab("", "Industry")
+        self.market_label = _make_tab("", "Market")
         self.fittings_label = _make_tab("", "Fittings")
         self.blueprints_label = _make_tab("", "Blueprints")
         self.killmails_label = _make_tab("", "Killmails")
         self.pi_label = _make_tab("", "PI")
-        self.contacts_label = _make_tab("", "Kontakte")
-        self.notifications_label = _make_tab("", "Benachrichtigungen")
-        self.calendar_label = _make_tab("", "Kalender")
+        self.contacts_label = _make_tab("", "Contacts")
+        self.notifications_label = _make_tab("", "Notifications")
+        self.calendar_label = _make_tab("", "Calendar")
         self.research_label = _make_tab("", "Research")
-        self.medals_label = _make_tab("", "Medaillen")
-        self.clones_label = _make_tab("", "Klone")
-        self.bookmarks_label = _make_tab("", "Lesezeichen")
+        self.medals_label = _make_tab("", "Medals")
+        self.clones_label = _make_tab("", "Clones")
+        self.bookmarks_label = _make_tab("", "Bookmarks")
         self.loyalty_label = _make_tab("", "LP")
         self.mining_label = _make_tab("", "Mining")
         self.fw_label = _make_tab("", "FW Stats")
@@ -395,28 +395,28 @@ class MainWindow(QMainWindow):
         self.tabs.add_tab_to_group(self.skill_planner, "Skill Planner", "skills")
 
         self.cert_browser = CertificateBrowserWidget(self.sde)
-        self.tabs.add_tab_to_group(self.cert_browser, "Zertifikate", "skills")
+        self.tabs.add_tab_to_group(self.cert_browser, "Certificates", "skills")
 
         self.schedule_editor = ScheduleEditorWidget(db=self.db)
-        self.tabs.add_tab_to_group(self.schedule_editor, "Wochenplaner", "skills")
+        self.tabs.add_tab_to_group(self.schedule_editor, "Weekly Planner", "skills")
 
         self.wallet_chart = WalletChartWidget()
         self.tabs.add_tab_to_group(self.wallet_chart, "ISK Chart", "finance")
 
         self.market_browser = MarketBrowserWidget(self.esi, self.sde)
-        self.tabs.add_tab_to_group(self.market_browser, "Marktbrowser", "finance")
+        self.tabs.add_tab_to_group(self.market_browser, "Market Browser", "finance")
 
         self.trade_tracker = TradeTrackerWidget(self.esi, self.sde)
         self.tabs.add_tab_to_group(self.trade_tracker, "Trade Tracker", "finance")
 
         self.trade_advisor = TradeAdvisorWidget(self.esi, self.sde)
-        self.tabs.add_tab_to_group(self.trade_advisor, "Handelsberater", "finance")
+        self.tabs.add_tab_to_group(self.trade_advisor, "Trade Advisor", "finance")
 
         self.implant_calc = ImplantCalculatorWidget(self.sde)
         self.tabs.add_tab_to_group(self.implant_calc, "Implant Calc", "tools")
 
         self.char_comparison = CharacterComparisonWidget()
-        self.tabs.add_tab_to_group(self.char_comparison, "Char-Vergleich", "tools")
+        self.tabs.add_tab_to_group(self.char_comparison, "Char Comparison", "tools")
 
         self.skills_chart = SkillsPieChartWidget()
         self.tabs.add_tab_to_group(self.skills_chart, "SP Chart", "tools")
@@ -425,7 +425,7 @@ class MainWindow(QMainWindow):
         self.tabs.add_tab_to_group(self.skill_books, "Skill Books", "tools")
 
         self.data_browser = DataBrowserWidget(self.sde)
-        self.tabs.add_tab_to_group(self.data_browser, "Datenbrowser", "tools")
+        self.tabs.add_tab_to_group(self.data_browser, "Data Browser", "tools")
 
         self.api_tester = APITesterWidget(self.esi, self.token_manager)
         self.tabs.add_tab_to_group(self.api_tester, "API Tester", "tools")
@@ -438,12 +438,12 @@ class MainWindow(QMainWindow):
 
         # Register label-based tabs in their groups too
         _label_tab_groups = {
-            "character": ["Übersicht", "Klone", "Kontakte", "Medaillen",
-                          "Lesezeichen", "Kalender", "LP", "FW Stats"],
+            "character": ["Overview", "Clones", "Contacts", "Medals",
+                          "Bookmarks", "Calendar", "LP", "FW Stats"],
             "skills":    ["Skill Queue", "Skills"],
-            "finance":   ["Wallet", "Markt", "Contracts", "Mining"],
-            "industry":  ["Industrie", "Blueprints", "Fittings", "Assets", "Research"],
-            "combat":    ["Killmails", "Mail", "Benachrichtigungen", "PI"],
+            "finance":   ["Wallet", "Market", "Contracts", "Mining"],
+            "industry":  ["Industry", "Blueprints", "Fittings", "Assets", "Research"],
+            "combat":    ["Killmails", "Mail", "Notifications", "PI"],
         }
         for group_key, tab_names in _label_tab_groups.items():
             for name in tab_names:
@@ -465,7 +465,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(splitter)
 
         # Default: select first tab and highlight in sidebar
-        self.sidebar_nav.set_active_tab("Übersicht")
+        self.sidebar_nav.set_active_tab("Overview")
 
     # ── Sidebar ↔ TabWidget synchronisation ──────────────────────
 
@@ -511,78 +511,78 @@ class MainWindow(QMainWindow):
         menu_bar = self.menuBar()
 
         # File menu
-        file_menu = menu_bar.addMenu("&Datei")
+        file_menu = menu_bar.addMenu("&File")
 
-        add_char_action = QAction("Charakter &hinzufügen (SSO Login)...", self)
+        add_char_action = QAction("Add &Character (SSO Login)...", self)
         add_char_action.triggered.connect(self._on_add_character)
         file_menu.addAction(add_char_action)
 
-        remove_char_action = QAction("Charakter &entfernen", self)
+        remove_char_action = QAction("&Remove Character", self)
         remove_char_action.triggered.connect(self._on_remove_character)
         file_menu.addAction(remove_char_action)
 
-        blank_char_action = QAction("&Blank Character erstellen...", self)
+        blank_char_action = QAction("Create &Blank Character...", self)
         blank_char_action.triggered.connect(self._on_create_blank_character)
         file_menu.addAction(blank_char_action)
 
         file_menu.addSeparator()
 
-        refresh_action = QAction("Daten &aktualisieren", self)
+        refresh_action = QAction("Refresh &Data", self)
         refresh_action.triggered.connect(self.refresh_data)
         file_menu.addAction(refresh_action)
 
         file_menu.addSeparator()
 
-        import_sde_action = QAction("SDE-Daten &importieren...", self)
+        import_sde_action = QAction("Import &SDE Data...", self)
         import_sde_action.triggered.connect(self._on_import_sde)
         file_menu.addAction(import_sde_action)
 
-        update_sde_action = QAction("SDE Online a&ktualisieren", self)
+        update_sde_action = QAction("&Update SDE Online", self)
         update_sde_action.triggered.connect(self._on_update_sde_online)
         file_menu.addAction(update_sde_action)
 
         file_menu.addSeparator()
 
-        settings_action = QAction("&Einstellungen...", self)
+        settings_action = QAction("Set&tings...", self)
         settings_action.triggered.connect(self._on_settings)
         file_menu.addAction(settings_action)
 
         file_menu.addSeparator()
 
-        export_csv_action = QAction("Tab als &CSV exportieren...", self)
+        export_csv_action = QAction("Export Tab as &CSV...", self)
         export_csv_action.triggered.connect(self._on_export_csv)
         file_menu.addAction(export_csv_action)
 
-        export_ics_action = QAction("Skill Queue als &ICS exportieren...", self)
+        export_ics_action = QAction("Export Skill Queue as &ICS...", self)
         export_ics_action.triggered.connect(self._on_export_ics)
         file_menu.addAction(export_ics_action)
 
         file_menu.addSeparator()
 
-        cloud_export_action = QAction("☁️ Cloud-Backup exportieren...", self)
+        cloud_export_action = QAction("☁️ Export Cloud Backup...", self)
         cloud_export_action.triggered.connect(self._on_cloud_export)
         file_menu.addAction(cloud_export_action)
 
-        cloud_import_action = QAction("☁️ Cloud-Backup importieren...", self)
+        cloud_import_action = QAction("☁️ Import Cloud Backup...", self)
         cloud_import_action.triggered.connect(self._on_cloud_import)
         file_menu.addAction(cloud_import_action)
 
         file_menu.addSeparator()
 
-        exit_action = QAction("&Beenden", self)
+        exit_action = QAction("E&xit", self)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
         # Help menu
-        help_menu = menu_bar.addMenu("&Hilfe")
+        help_menu = menu_bar.addMenu("&Help")
 
-        setup_wizard_action = QAction("🔧 &Einrichtungsassistent...", self)
+        setup_wizard_action = QAction("🔧 Setup &Wizard...", self)
         setup_wizard_action.triggered.connect(self._on_setup_wizard)
         help_menu.addAction(setup_wizard_action)
 
         help_menu.addSeparator()
 
-        about_action = QAction("Über &PyMon", self)
+        about_action = QAction("&About PyMon", self)
         about_action.triggered.connect(self._on_about)
         help_menu.addAction(about_action)
 

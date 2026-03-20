@@ -104,7 +104,7 @@ class MarketBrowserWidget(QWidget):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        title = QLabel("\U0001f4c8 Marktbrowser")
+        title = QLabel("\U0001f4c8 Market Browser")
         title.setProperty("cssClass", "widget-title")
         root.addWidget(title)
 
@@ -119,12 +119,12 @@ class MarketBrowserWidget(QWidget):
         left_layout.setSpacing(4)
 
         self._search = QLineEdit()
-        self._search.setPlaceholderText("\U0001f50d Item suchen\u2026")
+        self._search.setPlaceholderText("\U0001f50d Search item\u2026")
         self._search.textChanged.connect(self._on_search_text)
         left_layout.addWidget(self._search)
 
         self._tree = QTreeWidget()
-        self._tree.setHeaderLabels(["Marktgruppe / Item"])
+        self._tree.setHeaderLabels(["Market Group / Item"])
         self._tree.setRootIsDecorated(True)
         self._tree.setAlternatingRowColors(True)
         self._tree.header().setSectionResizeMode(
@@ -143,7 +143,7 @@ class MarketBrowserWidget(QWidget):
         right_layout.setSpacing(6)
 
         # Item header
-        self._item_header = QLabel("W\u00e4hle ein Item aus dem Marktbaum oder suche.")
+        self._item_header = QLabel("Select an item from the market tree or search.")
         self._item_header.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
         self._item_header.setStyleSheet(f"color: {Colors.GOLD};")
         right_layout.addWidget(self._item_header)
@@ -159,14 +159,14 @@ class MarketBrowserWidget(QWidget):
         right_layout.addLayout(region_row)
 
         # ── Snapshot card ──
-        snap_group = QGroupBox("Preisübersicht")
+        snap_group = QGroupBox("Price Overview")
         snap_group.setProperty("cssClass", "market-card")
         snap_layout = QHBoxLayout(snap_group)
 
-        self._lbl_sell = self._kpi_label("Bester Verkauf", "---")
-        self._lbl_buy = self._kpi_label("Bestes Kaufangebot", "---")
+        self._lbl_sell = self._kpi_label("Best Sell", "---")
+        self._lbl_buy = self._kpi_label("Best Buy", "---")
         self._lbl_spread = self._kpi_label("Spread", "---")
-        self._lbl_avg = self._kpi_label("Ø-Preis (global)", "---")
+        self._lbl_avg = self._kpi_label("Avg Price (global)", "---")
 
         for w in (self._lbl_sell, self._lbl_buy, self._lbl_spread, self._lbl_avg):
             snap_layout.addWidget(w)
@@ -195,7 +195,7 @@ class MarketBrowserWidget(QWidget):
         right_layout.addWidget(orders_splitter, 1)
 
         # ── Price history chart ──
-        chart_group = QGroupBox("Preisentwicklung (90 Tage)")
+        chart_group = QGroupBox("Price History (90 Days)")
         chart_group.setProperty("cssClass", "market-card")
         chart_layout = QVBoxLayout(chart_group)
         chart_layout.setContentsMargins(2, 2, 2, 2)
@@ -206,19 +206,19 @@ class MarketBrowserWidget(QWidget):
             self._chart.setMinimumHeight(180)
             self._chart.showGrid(x=True, y=True, alpha=0.15)
             self._chart.setLabel("left", "ISK")
-            self._chart.setLabel("bottom", "Tag")
+            self._chart.setLabel("bottom", "Day")
             self._chart.addLegend(offset=(10, 10))
             chart_layout.addWidget(self._chart)
         else:
             self._chart = None
             chart_layout.addWidget(
-                QLabel("pyqtgraph nicht installiert \u2013 Preis-Chart deaktiviert."),
+                QLabel("pyqtgraph not installed \u2013 Price chart disabled."),
             )
 
         right_layout.addWidget(chart_group, 1)
 
         # ── Region comparison table ──
-        cmp_group = QGroupBox("Regionsvergleich")
+        cmp_group = QGroupBox("Region Comparison")
         cmp_group.setProperty("cssClass", "market-card")
         cmp_layout = QVBoxLayout(cmp_group)
         cmp_layout.setContentsMargins(2, 2, 2, 2)
@@ -271,7 +271,7 @@ class MarketBrowserWidget(QWidget):
     def _make_order_table(title: str) -> QTableWidget:
         t = QTableWidget()
         t.setColumnCount(3)
-        t.setHorizontalHeaderLabels(["Preis", "Menge", "Standort"])
+        t.setHorizontalHeaderLabels(["Price", "Volume", "Location"])
         hdr = t.horizontalHeader()
         hdr.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         hdr.setStretchLastSection(True)
@@ -296,7 +296,7 @@ class MarketBrowserWidget(QWidget):
                 "id": grp.get("market_group_id"),
             })
             # Add dummy child so the expand arrow appears
-            item.addChild(QTreeWidgetItem(["Laden\u2026"]))
+            item.addChild(QTreeWidgetItem(["Loading\u2026"]))
             self._tree.addTopLevelItem(item)
 
     def _on_tree_item_expanded(self, item: QTreeWidgetItem) -> None:
@@ -320,7 +320,7 @@ class MarketBrowserWidget(QWidget):
                 "kind": "group",
                 "id": child.get("market_group_id"),
             })
-            ci.addChild(QTreeWidgetItem(["Laden\u2026"]))
+            ci.addChild(QTreeWidgetItem(["Loading\u2026"]))
             item.addChild(ci)
 
         # Items in this group (leaf)
@@ -386,7 +386,7 @@ class MarketBrowserWidget(QWidget):
         import threading
         region_id = self._region_combo.currentData() or THE_FORGE
         self._item_header.setText(
-            f"{self._item_header.text().split('  ⏳')[0]}  ⏳ Lade Marktdaten…"
+            f"{self._item_header.text().split('  ⏳')[0]}  ⏳ Loading market data…"
         )
 
         def _worker() -> None:
@@ -420,7 +420,7 @@ class MarketBrowserWidget(QWidget):
             self._data_ready.emit(snap, history, comparison, orders)
         except Exception as e:
             logger.error("Market data fetch failed: %s", e, exc_info=True)
-            self._error_occurred.emit(f"Fehler: {e}")
+            self._error_occurred.emit(f"Error: {e}")
 
     # ═══════════════════════════════════════════════════════════════
     #  Signal slots (main thread)
@@ -543,9 +543,9 @@ class MarketBrowserWidget(QWidget):
         pen_hi = pg.mkPen(color=Colors.RED, width=1, style=Qt.PenStyle.DashLine)
         pen_lo = pg.mkPen(color=Colors.GREEN, width=1, style=Qt.PenStyle.DashLine)
 
-        self._chart.plot(days_idx, avg, pen=pen_avg, name="\u00d8 Preis")
-        self._chart.plot(days_idx, hi, pen=pen_hi, name="Hoch")
-        self._chart.plot(days_idx, lo, pen=pen_lo, name="Tief")
+        self._chart.plot(days_idx, avg, pen=pen_avg, name="Avg Price")
+        self._chart.plot(days_idx, hi, pen=pen_hi, name="High")
+        self._chart.plot(days_idx, lo, pen=pen_lo, name="Low")
 
     def _update_comparison(self, comparison: RegionComparison) -> None:
         snaps = comparison.snapshots

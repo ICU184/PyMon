@@ -90,12 +90,12 @@ class APITesterWidget(QWidget):
         self._endpoint_input.returnPressed.connect(self._on_send)
         row1.addWidget(self._endpoint_input, stretch=1)
 
-        self._send_btn = QPushButton("▶ Senden")
+        self._send_btn = QPushButton("▶ Send")
         self._send_btn.setProperty("cssClass", "action")
         self._send_btn.clicked.connect(self._on_send)
         row1.addWidget(self._send_btn)
 
-        clear_btn = QPushButton("✕ Leeren")
+        clear_btn = QPushButton("✕ Clear")
         clear_btn.setProperty("cssClass", "danger")
         clear_btn.clicked.connect(self._on_clear)
         row1.addWidget(clear_btn)
@@ -104,16 +104,16 @@ class APITesterWidget(QWidget):
 
         # Examples dropdown
         row2 = QHBoxLayout()
-        row2.addWidget(QLabel("Beispiel:"))
+        row2.addWidget(QLabel("Example:"))
         self._examples_combo = QComboBox()
-        self._examples_combo.addItem("— Endpoint wählen —")
+        self._examples_combo.addItem("— Select Endpoint —")
         for ep in _EXAMPLE_ENDPOINTS:
             self._examples_combo.addItem(ep)
         self._examples_combo.currentTextChanged.connect(self._on_example_selected)
         row2.addWidget(self._examples_combo, stretch=1)
 
         self._auth_check = QComboBox()
-        self._auth_check.addItems(["🔒 Mit Token", "🔓 Ohne Token"])
+        self._auth_check.addItems(["🔒 With Token", "🔓 Without Token"])
         self._auth_check.setFixedWidth(150)
         row2.addWidget(self._auth_check)
 
@@ -133,7 +133,7 @@ class APITesterWidget(QWidget):
         self._method_combo.currentTextChanged.connect(self._on_method_changed)
 
         # Status
-        self._status = QLabel("Bereit")
+        self._status = QLabel("Ready")
         self._status.setProperty("cssClass", "hint")
         layout.addWidget(self._status)
 
@@ -141,7 +141,7 @@ class APITesterWidget(QWidget):
         self._response = QPlainTextEdit()
         self._response.setReadOnly(True)
         self._response.setProperty("cssClass", "code")
-        self._response.setPlaceholderText("Response wird hier angezeigt…")
+        self._response.setPlaceholderText("Response will be displayed here…")
         mono = QFont("Consolas", 11)
         self._response.setFont(mono)
         layout.addWidget(self._response, stretch=1)
@@ -162,18 +162,18 @@ class APITesterWidget(QWidget):
 
     def _on_clear(self) -> None:
         self._response.clear()
-        self._status.setText("Bereit")
+        self._status.setText("Ready")
 
     def _on_send(self) -> None:
         endpoint = self._endpoint_input.text().strip()
         if not endpoint:
-            self._status.setText("⚠ Bitte Endpoint eingeben")
+            self._status.setText("⚠ Please enter endpoint")
             return
 
         # Replace {character_id} placeholder
         if "{character_id}" in endpoint:
             if not self._current_character_id:
-                self._status.setText("⚠ Kein Charakter ausgewählt")
+                self._status.setText("⚠ No character selected")
                 return
             endpoint = endpoint.replace("{character_id}", str(self._current_character_id))
 
@@ -219,14 +219,14 @@ class APITesterWidget(QWidget):
                 size = len(formatted)
                 header = (
                     f"// ✓ {method} {endpoint}\n"
-                    f"// {elapsed:.2f}s | {lines} Zeilen | {size:,} Bytes\n"
+                    f"// {elapsed:.2f}s | {lines} lines | {size:,} bytes\n"
                     f"// {datetime.now(UTC).strftime('%H:%M:%S UTC')}\n"
-                    f"// {'🔒 Authentifiziert' if token else '🔓 Ohne Auth'}\n\n"
+                    f"// {'🔒 Authenticated' if token else '🔓 No Auth'}\n\n"
                 )
                 self._result_ready.emit(header + formatted)
 
             except Exception as e:
-                self._result_ready.emit(f"// ✗ FEHLER: {e}\n\n{type(e).__name__}: {e}")
+                self._result_ready.emit(f"// ✗ ERROR: {e}\n\n{type(e).__name__}: {e}")
             finally:
                 loop.close()
 
@@ -237,6 +237,6 @@ class APITesterWidget(QWidget):
         self._response.setPlainText(text)
         self._send_btn.setEnabled(True)
         if "✓" in text.split("\n")[0]:
-            self._status.setText("✓ Erfolgreich")
+            self._status.setText("✓ Successful")
         else:
-            self._status.setText("✗ Fehler")
+            self._status.setText("✗ Error")

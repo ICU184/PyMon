@@ -50,12 +50,12 @@ class CharSnapshot:
 _ROWS: list[tuple[str, str]] = [
     ("corporation_name", "Corporation"),
     ("alliance_name", "Alliance"),
-    ("birthday", "Geburtstag"),
+    ("birthday", "Birthday"),
     ("_sep_1", ""),
     ("total_sp", "Skillpoints"),
-    ("unallocated_sp", "Freie SP"),
-    ("skill_count", "Trainierte Skills"),
-    ("skills_at_5", "Skills auf Level V"),
+    ("unallocated_sp", "Unallocated SP"),
+    ("skill_count", "Trained Skills"),
+    ("skills_at_5", "Skills at Level V"),
     ("_sep_2", ""),
     ("wallet_balance", "ISK Balance"),
     ("security_status", "Security Status"),
@@ -66,9 +66,9 @@ _ROWS: list[tuple[str, str]] = [
     ("willpower", "Willpower"),
     ("charisma", "Charisma"),
     ("_sep_4", ""),
-    ("current_training", "Aktuelles Training"),
-    ("queue_length", "Queue Einträge"),
-    ("queue_finish", "Queue fertig"),
+    ("current_training", "Current Training"),
+    ("queue_length", "Queue Entries"),
+    ("queue_finish", "Queue Finish"),
 ]
 
 
@@ -99,11 +99,11 @@ class CharacterComparisonWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        title = QLabel("📊 Charakter-Vergleich")
+        title = QLabel("📊 Character Comparison")
         title.setProperty("cssClass", "widget-title")
         layout.addWidget(title)
 
-        self._hint = QLabel("Lade Daten für alle Charaktere …")
+        self._hint = QLabel("Loading data for all characters …")
         self._hint.setProperty("cssClass", "hint")
         layout.addWidget(self._hint)
 
@@ -123,12 +123,12 @@ class CharacterComparisonWidget(QWidget):
     def _rebuild(self) -> None:
         snaps = self._snapshots
         if not snaps:
-            self._hint.setText("Keine Charaktere vorhanden.")
+            self._hint.setText("No characters available.")
             self._table.setRowCount(0)
             self._table.setColumnCount(0)
             return
 
-        self._hint.setText(f"{len(snaps)} Charakter(e) werden verglichen")
+        self._hint.setText(f"Comparing {len(snaps)} character(s)")
 
         row_defs = [r for r in _ROWS]  # copy
         n_rows = len(row_defs)

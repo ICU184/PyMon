@@ -31,7 +31,7 @@ class SettingsDialog(QDialog):
     def __init__(self, config: Config, parent=None) -> None:
         super().__init__(parent)
         self.config = config
-        self.setWindowTitle("Einstellungen")
+        self.setWindowTitle("Settings")
         self.setMinimumSize(600, 500)
         self._setup_ui()
 
@@ -45,16 +45,16 @@ class SettingsDialog(QDialog):
         general_layout = QVBoxLayout(general_tab)
 
         # SSO Group
-        sso_group = QGroupBox("EVE SSO Konfiguration")
+        sso_group = QGroupBox("EVE SSO Configuration")
         sso_layout = QFormLayout()
 
         self.client_id_input = QLineEdit(self.config.client_id)
-        self.client_id_input.setPlaceholderText("EVE Application Client-ID eingeben...")
+        self.client_id_input.setPlaceholderText("Enter EVE Application Client-ID...")
         sso_layout.addRow("Client-ID:", self.client_id_input)
 
         sso_help = QLabel(
             '<a href="https://developers.eveonline.com/applications">'
-            "EVE Developer Portal</a> – Erstelle dort eine Application."
+            "EVE Developer Portal</a> – Create an Application there."
         )
         sso_help.setOpenExternalLinks(True)
         sso_layout.addRow("", sso_help)
@@ -63,66 +63,66 @@ class SettingsDialog(QDialog):
         general_layout.addWidget(sso_group)
 
         # Application Group
-        app_group = QGroupBox("Anwendung")
+        app_group = QGroupBox("Application")
         app_layout = QFormLayout()
 
         self.refresh_spin = QSpinBox()
         self.refresh_spin.setRange(1, 60)
         self.refresh_spin.setValue(self.config.refresh_interval_minutes)
-        self.refresh_spin.setSuffix(" Minuten")
-        app_layout.addRow("Auto-Refresh Intervall:", self.refresh_spin)
+        self.refresh_spin.setSuffix(" Minutes")
+        app_layout.addRow("Auto-Refresh Interval:", self.refresh_spin)
 
-        self.debug_checkbox = QCheckBox("Debug-Logging aktivieren")
+        self.debug_checkbox = QCheckBox("Enable Debug Logging")
         self.debug_checkbox.setChecked(self.config.debug)
         app_layout.addRow(self.debug_checkbox)
 
         data_dir_label = QLabel(str(self.config.data_dir))
         data_dir_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        app_layout.addRow("Datenverzeichnis:", data_dir_label)
+        app_layout.addRow("Data Directory:", data_dir_label)
 
         db_path_label = QLabel(str(self.config.db_path))
         db_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        app_layout.addRow("Datenbank:", db_path_label)
+        app_layout.addRow("Database:", db_path_label)
 
         sde_path_label = QLabel(str(self.config.sde_db_path))
         sde_path_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
-        app_layout.addRow("SDE-Datenbank:", sde_path_label)
+        app_layout.addRow("SDE Database:", sde_path_label)
 
         app_group.setLayout(app_layout)
         general_layout.addWidget(app_group)
 
         # Notifications Group
-        notify_group = QGroupBox("Tray-Benachrichtigungen")
+        notify_group = QGroupBox("Tray Notifications")
         notify_layout = QFormLayout()
 
-        self.notify_skill_complete = QCheckBox("Bei Skill-Fertigstellung benachrichtigen")
+        self.notify_skill_complete = QCheckBox("Notify on Skill Completion")
         self.notify_skill_complete.setChecked(self.config.tray_notify_skill_complete)
         notify_layout.addRow(self.notify_skill_complete)
 
-        self.notify_queue_empty = QCheckBox("Bei leerer Skill Queue warnen")
+        self.notify_queue_empty = QCheckBox("Warn on Empty Skill Queue")
         self.notify_queue_empty.setChecked(self.config.tray_notify_queue_empty)
         notify_layout.addRow(self.notify_queue_empty)
 
         self.popup_duration = QSpinBox()
         self.popup_duration.setRange(1, 30)
         self.popup_duration.setValue(self.config.tray_show_popup_duration)
-        self.popup_duration.setSuffix(" Sekunden")
-        notify_layout.addRow("Popup-Dauer:", self.popup_duration)
+        self.popup_duration.setSuffix(" Seconds")
+        notify_layout.addRow("Popup Duration:", self.popup_duration)
 
         notify_group.setLayout(notify_layout)
         general_layout.addWidget(notify_group)
 
         general_layout.addStretch()
 
-        tabs.addTab(general_tab, "Allgemein")
+        tabs.addTab(general_tab, "General")
 
         # ── Scopes Tab ──
         scopes_tab = QWidget()
         scopes_layout = QVBoxLayout(scopes_tab)
 
         scopes_label = QLabel(
-            "ESI-Scopes die beim SSO-Login angefordert werden.\n"
-            "Änderungen werden beim nächsten Login wirksam."
+            "ESI Scopes requested during SSO Login.\n"
+            "Changes will take effect on the next login."
         )
         scopes_layout.addWidget(scopes_label)
 
@@ -137,15 +137,15 @@ class SettingsDialog(QDialog):
         email_tab = QWidget()
         email_layout = QVBoxLayout(email_tab)
 
-        email_group = QGroupBox("E-Mail-Benachrichtigungen")
+        email_group = QGroupBox("E-Mail Notifications")
         email_form = QFormLayout()
 
-        self.email_enabled = QCheckBox("E-Mail-Benachrichtigungen aktivieren")
+        self.email_enabled = QCheckBox("Enable E-Mail Notifications")
         self.email_enabled.setChecked(self.config.email_enabled)
         email_form.addRow(self.email_enabled)
 
         self.email_smtp_server = QLineEdit(self.config.email_smtp_server)
-        self.email_smtp_server.setPlaceholderText("z.B. smtp.gmail.com")
+        self.email_smtp_server.setPlaceholderText("e.g. smtp.gmail.com")
         email_form.addRow("SMTP Server:", self.email_smtp_server)
 
         self.email_smtp_port = QSpinBox()
@@ -155,21 +155,21 @@ class SettingsDialog(QDialog):
 
         self.email_smtp_user = QLineEdit(self.config.email_smtp_user)
         self.email_smtp_user.setPlaceholderText("user@example.com")
-        email_form.addRow("Benutzername:", self.email_smtp_user)
+        email_form.addRow("Username:", self.email_smtp_user)
 
         self.email_smtp_password = QLineEdit(self.config.email_smtp_password)
         self.email_smtp_password.setEchoMode(QLineEdit.EchoMode.Password)
-        email_form.addRow("Passwort:", self.email_smtp_password)
+        email_form.addRow("Password:", self.email_smtp_password)
 
         self.email_to_input = QLineEdit(self.config.email_to)
-        self.email_to_input.setPlaceholderText("empfaenger@example.com")
-        email_form.addRow("Empfänger:", self.email_to_input)
+        self.email_to_input.setPlaceholderText("recipient@example.com")
+        email_form.addRow("Recipient:", self.email_to_input)
 
-        self.email_use_tls = QCheckBox("TLS verwenden (empfohlen)")
+        self.email_use_tls = QCheckBox("Use TLS (recommended)")
         self.email_use_tls.setChecked(self.config.email_use_tls)
         email_form.addRow(self.email_use_tls)
 
-        test_email_btn = QPushButton("📧 Test-E-Mail senden")
+        test_email_btn = QPushButton("📧 Send Test E-Mail")
         test_email_btn.clicked.connect(self._send_test_email)
         email_form.addRow(test_email_btn)
 
@@ -187,7 +187,7 @@ class SettingsDialog(QDialog):
         cloud_form = QFormLayout()
 
         cloud_info = QLabel(
-            "Synchronisiere Daten mit einem lokalen Cloud-Ordner\n"
+            "Synchronize data with a local cloud folder\n"
             "(Dropbox, Google Drive, OneDrive etc.)."
         )
         cloud_info.setWordWrap(True)
@@ -195,12 +195,12 @@ class SettingsDialog(QDialog):
 
         sync_row = QHBoxLayout()
         self.cloud_sync_path = QLineEdit(self.config.cloud_sync_path)
-        self.cloud_sync_path.setPlaceholderText("z.B. C:\\Users\\…\\Dropbox")
+        self.cloud_sync_path.setPlaceholderText("e.g. C:\\Users\\…\\Dropbox")
         sync_row.addWidget(self.cloud_sync_path)
-        browse_btn = QPushButton("📂 Durchsuchen…")
+        browse_btn = QPushButton("📂 Browse…")
         browse_btn.clicked.connect(self._browse_cloud_folder)
         sync_row.addWidget(browse_btn)
-        cloud_form.addRow("Sync-Ordner:", sync_row)
+        cloud_form.addRow("Sync Folder:", sync_row)
 
         cloud_group.setLayout(cloud_form)
         cloud_layout.addWidget(cloud_group)
@@ -215,13 +215,13 @@ class SettingsDialog(QDialog):
         update_group = QGroupBox("Auto-Update")
         update_form = QFormLayout()
 
-        self.auto_update_check = QCheckBox("Beim Start auf Updates prüfen")
+        self.auto_update_check = QCheckBox("Check for Updates on Startup")
         self.auto_update_check.setChecked(self.config.auto_update_check)
         update_form.addRow(self.auto_update_check)
 
         update_info = QLabel(
-            "PyMon prüft beim Start, ob eine neue Version auf GitHub verfügbar ist.\n"
-            "Es werden keine Daten automatisch heruntergeladen."
+            "PyMon checks for a new version on GitHub at startup.\n"
+            "No data is downloaded automatically."
         )
         update_info.setWordWrap(True)
         update_form.addRow(update_info)
@@ -288,19 +288,19 @@ class SettingsDialog(QDialog):
             use_tls=self.email_use_tls.isChecked(),
         )
         if not notifier.is_configured:
-            QMessageBox.warning(self, "E-Mail", "Bitte alle SMTP-Felder ausfüllen.")
+            QMessageBox.warning(self, "E-Mail", "Please fill in all SMTP fields.")
             return
 
         ok = notifier.send_test()
         if ok:
-            QMessageBox.information(self, "E-Mail", "✓ Test-E-Mail erfolgreich gesendet!")
+            QMessageBox.information(self, "E-Mail", "✓ Test E-Mail successfully sent!")
         else:
-            QMessageBox.critical(self, "E-Mail", "✗ Senden fehlgeschlagen. Prüfe die Einstellungen.")
+            QMessageBox.critical(self, "E-Mail", "✗ Sending failed. Check your settings.")
 
     def _browse_cloud_folder(self) -> None:
         """Browse for a cloud sync folder."""
         folder = QFileDialog.getExistingDirectory(
-            self, "Cloud Sync-Ordner wählen", self.cloud_sync_path.text()
+            self, "Choose Cloud Sync Folder", self.cloud_sync_path.text()
         )
         if folder:
             self.cloud_sync_path.setText(folder)

@@ -75,9 +75,9 @@ class DetachedWindow(QWidget):
 
         tb_layout.addStretch()
 
-        dock_btn = QPushButton("↩ Andocken")
+        dock_btn = QPushButton("↩ Dock")
         dock_btn.setFixedHeight(26)
-        dock_btn.setToolTip("Tab zurück ins Hauptfenster")
+        dock_btn.setToolTip("Tab back to main window")
         dock_btn.clicked.connect(self.close)
         tb_layout.addWidget(dock_btn)
 
@@ -166,7 +166,7 @@ class DraggableTabBar(QTabBar):
 
         menu = QMenu(self)
 
-        detach_action = QAction("🗗 Als Fenster loslösen", self)
+        detach_action = QAction("🗗 Detach as window", self)
         detach_action.triggered.connect(lambda: self.tab_detach_requested.emit(idx))
         menu.addAction(detach_action)
 
@@ -402,7 +402,7 @@ class DockableTabWidget(QTabWidget):
 
         # Create floating window
         group_label = group_key.replace("_", " ").title()
-        win = DetachedWindow(f"Gruppe: {group_label}", container, parent=None)
+        win = DetachedWindow(f"Group: {group_label}", container, parent=None)
         win.closed.connect(lambda title, w: self._redock_group(group_key, w))
         self._detached_groups[group_key] = win
 

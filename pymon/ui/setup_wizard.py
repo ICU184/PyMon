@@ -72,13 +72,13 @@ class ValidateClientIdThread(QThread):
             if resp.status_code in (200, 302):
                 self.valid.emit()
             elif resp.status_code >= 400:
-                self.invalid.emit(f"ESI hat die Client ID abgelehnt (HTTP {resp.status_code})")
+                self.invalid.emit(f"ESI rejected the Client ID (HTTP {resp.status_code})")
             else:
                 # Treat other codes as OK – might just be CCP being CCP
                 self.valid.emit()
 
         except Exception as e:
-            self.invalid.emit(f"Verbindung fehlgeschlagen: {e}")
+            self.invalid.emit(f"Connection failed: {e}")
 
 
 # ── Styled Helpers ─────────────────────────────────────────────────
@@ -157,7 +157,7 @@ def _copy_label(label_text: str, value: str) -> QWidget:
 
     copy_btn = QPushButton("📋")
     copy_btn.setFixedSize(36, 36)
-    copy_btn.setToolTip("In Zwischenablage kopieren")
+    copy_btn.setToolTip("Copy to clipboard")
     copy_btn.setCursor(Qt.PointingHandCursor)
     copy_btn.setStyleSheet(
         "QPushButton { background: #0f3460; border: 1px solid #30363d; border-radius: 4px; }"
@@ -189,30 +189,30 @@ class WelcomePage(QWizardPage):
         layout.setSpacing(12)
         layout.setContentsMargins(30, 20, 30, 20)
 
-        layout.addWidget(_heading("🚀  Willkommen bei PyMon!"))
+        layout.addWidget(_heading("🚀  Welcome to PyMon!"))
 
         layout.addWidget(_subheading(
-            "PyMon ist ein Character Monitor für EVE Online. "
-            "Um deine Charakterdaten abrufen zu können, benötigt PyMon Zugriff "
-            "auf die EVE ESI API."
+            "PyMon is a Character Monitor for EVE Online. "
+            "To retrieve your character data, PyMon requires access "
+            "to the EVE ESI API."
         ))
 
         layout.addWidget(_info_box(
-            "Dazu musst du einmalig eine <b>ESI Application</b> im EVE Developer Portal "
-            "erstellen. Das dauert nur <b>2 Minuten</b> und ist komplett kostenlos.<br><br>"
-            "Keine Sorge – dieser Wizard führt dich Schritt für Schritt durch den Prozess! "
-            "Deine Daten bleiben dabei lokal auf deinem Rechner."
+            "For this, you need to create an <b>ESI Application</b> once in the EVE Developer Portal. "
+            "This only takes <b>2 minutes</b> and is completely free.<br><br>"
+            "Don't worry – this wizard will guide you step by step through the process! "
+            "Your data will remain locally on your computer."
         ))
 
         layout.addItem(QSpacerItem(0, 20, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
         # What you'll need
         needs = QLabel(
-            '<p style="color: #c9d1d9; font-size: 11pt;"><b>Was du brauchst:</b></p>'
+            '<p style="color: #c9d1d9; font-size: 11pt;"><b>What you need:</b></p>'
             '<ul style="color: #e0e0e0; font-size: 10pt; line-height: 1.8;">'
-            '<li>Einen <span style="color: #58a6ff;">EVE Online Account</span></li>'
-            '<li>Zugang zum <span style="color: #58a6ff;">EVE Developer Portal</span></li>'
-            '<li>Ca. 2 Minuten Zeit ☕</li>'
+            '<li>An <span style="color: #58a6ff;">EVE Online Account</span></li>'
+            '<li>Access to the <span style="color: #58a6ff;">EVE Developer Portal</span></li>'
+            '<li>Approx. 2 minutes of time ☕</li>'
             '</ul>'
         )
         needs.setTextFormat(Qt.RichText)
@@ -235,42 +235,42 @@ class CreateAppPage(QWizardPage):
         layout.setSpacing(8)
         layout.setContentsMargins(30, 20, 30, 20)
 
-        layout.addWidget(_heading("📝  ESI Application erstellen"))
+        layout.addWidget(_heading("📝  Create ESI Application"))
 
         layout.addWidget(_subheading(
-            "Öffne das EVE Developer Portal und erstelle eine neue Application "
-            "mit den folgenden Einstellungen:"
+            "Open the EVE Developer Portal and create a new Application "
+            "with the following settings:"
         ))
 
         # Open portal button
-        layout.addWidget(_link_button("EVE Developer Portal öffnen", EVE_DEV_PORTAL))
+        layout.addWidget(_link_button("Open EVE Developer Portal", EVE_DEV_PORTAL))
 
         layout.addItem(QSpacerItem(0, 12, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
         # Step-by-step instructions
-        layout.addWidget(_step_label(1, 'Klicke auf <b>"Create New Application"</b>'))
+        layout.addWidget(_step_label(1, 'Click on <b>"Create New Application"</b>'))
 
-        layout.addWidget(_step_label(2, 'Name: Gib einen beliebigen Namen ein, z.B. <b>"PyMon"</b>'))
+        layout.addWidget(_step_label(2, 'Name: Enter any name, e.g. <b>"PyMon"</b>'))
 
-        layout.addWidget(_step_label(3, 'Description: Kann leer bleiben oder z.B. <b>"Character Monitor"</b>'))
+        layout.addWidget(_step_label(3, 'Description: Can be left empty or e.g. <b>"Character Monitor"</b>'))
 
         layout.addWidget(_step_label(4,
-            'Connection Type: Wähle <b>"Authentication & API Access"</b>'
+            'Connection Type: Select <b>"Authentication & API Access"</b>'
         ))
 
         layout.addWidget(_step_label(5,
-            'Permissions: Klicke auf <b>"Select All"</b> um alle ESI-Scopes zu aktivieren '
-            '(oder wähle manuell die gewünschten aus)'
+            'Permissions: Click on <b>"Select All"</b> to activate all ESI scopes '
+            '(or select the desired ones manually)'
         ))
 
         layout.addWidget(_step_label(6,
-            'Callback URL: Trage die folgende URL ein und drücke <b>"Add"</b>'
+            'Callback URL: Enter the following URL and press <b>"Add"</b>'
         ))
 
         # Callback URL with copy button
         layout.addWidget(_copy_label("Callback URL", CALLBACK_URL))
 
-        layout.addWidget(_step_label(7, 'Klicke auf <b>"Create Application"</b>'))
+        layout.addWidget(_step_label(7, 'Click on <b>"Create Application"</b>'))
 
         layout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
 
@@ -291,21 +291,21 @@ class ClientIdPage(QWizardPage):
         layout.setSpacing(10)
         layout.setContentsMargins(30, 20, 30, 20)
 
-        layout.addWidget(_heading("🔑  Client ID eingeben"))
+        layout.addWidget(_heading("🔑  Enter Client ID"))
 
         layout.addWidget(_subheading(
-            "Nachdem du die Application erstellt hast, findest du auf der "
-            "Application-Detailseite die <b>Client ID</b>. "
-            "Kopiere sie und füge sie unten ein."
+            "After you have created the Application, you will find the "
+            "<b>Client ID</b> on the Application details page. "
+            "Copy it and paste it below."
         ))
 
         # Where to find it
         layout.addWidget(_info_box(
-            "💡 <b>Wo finde ich die Client ID?</b><br><br>"
-            "Im Developer Portal → Klicke auf deine Application → "
-            'Unter <b>"Client ID"</b> steht eine lange Zeichenkette '
-            '(z.B. <code style="color: #e2b714;">a1b2c3d4e5f6...</code>).<br><br>'
-            "Kopiere diese und füge sie unten ein."
+            "💡 <b>Where do I find the Client ID?</b><br><br>"
+            "In the Developer Portal → Click on your Application → "
+            'Under <b>"Client ID"</b> is a long string '
+            '(e.g. <code style="color: #e2b714;">a1b2c3d4e5f6...</code>).<br><br>'
+            "Copy this and paste it below."
         ))
 
         layout.addItem(QSpacerItem(0, 8, QSizePolicy.Minimum, QSizePolicy.Fixed))
@@ -316,7 +316,7 @@ class ClientIdPage(QWizardPage):
         layout.addWidget(input_label)
 
         self.client_id_input = QLineEdit()
-        self.client_id_input.setPlaceholderText("Client ID hier einfügen...")
+        self.client_id_input.setPlaceholderText("Paste Client ID here...")
         self.client_id_input.setMinimumHeight(42)
         self.client_id_input.setStyleSheet(
             "QLineEdit { background: #21262d; color: #e0e0e0; border: 2px solid #30363d; "
@@ -334,7 +334,7 @@ class ClientIdPage(QWizardPage):
         layout.addWidget(self.status_label)
 
         # Validate button
-        self.validate_btn = QPushButton("✅  Client ID prüfen")
+        self.validate_btn = QPushButton("✅  Verify Client ID")
         self.validate_btn.setEnabled(False)
         self.validate_btn.setCursor(Qt.PointingHandCursor)
         self.validate_btn.setMinimumHeight(40)
@@ -366,7 +366,7 @@ class ClientIdPage(QWizardPage):
 
         self._validating = True
         self.validate_btn.setEnabled(False)
-        self._update_status("⏳ Prüfe Client ID...", "#56d4e0")
+        self._update_status("⏳ Verifying Client ID...", "#56d4e0")
 
         self._thread = ValidateClientIdThread(client_id, self)
         self._thread.valid.connect(self._on_valid)
@@ -376,7 +376,7 @@ class ClientIdPage(QWizardPage):
 
     def _on_valid(self) -> None:
         self._validated = True
-        self._update_status("✅ Client ID ist gültig!", "#2ea043")
+        self._update_status("✅ Client ID is valid!", "#2ea043")
         self.completeChanged.emit()
 
     def _on_invalid(self, msg: str) -> None:
@@ -416,24 +416,23 @@ class CompletePage(QWizardPage):
         layout.setSpacing(12)
         layout.setContentsMargins(30, 20, 30, 20)
 
-        layout.addWidget(_heading("🎉  Einrichtung abgeschlossen!"))
+        layout.addWidget(_heading("🎉  Setup complete!"))
 
         layout.addWidget(_subheading(
-            "PyMon ist jetzt bereit. Beim Klick auf \"Fertigstellen\" wird "
-            "die Konfiguration gespeichert und du kannst direkt deinen ersten "
-            "Charakter hinzufügen."
+            "PyMon is now ready. Clicking \"Finish\" will save the "
+            "configuration and you can directly add your first character."
         ))
 
         # What happens next
         next_steps = QLabel(
-            '<p style="color: #c9d1d9; font-size: 11pt;"><b>Nächste Schritte:</b></p>'
+            '<p style="color: #c9d1d9; font-size: 11pt;"><b>Next Steps:</b></p>'
             '<ol style="color: #e0e0e0; font-size: 10pt; line-height: 2.0;">'
-            '<li>PyMon öffnet sich mit dem Hauptfenster</li>'
-            '<li>Klicke auf <span style="color: #4ecca3; font-weight: bold;">"Charakter hinzufügen"</span> '
-            'in der Seitenleiste</li>'
-            '<li>Du wirst zur EVE Online Login-Seite weitergeleitet</li>'
-            '<li>Melde dich an und autorisiere den Zugriff</li>'
-            '<li>Dein Charakter erscheint automatisch in PyMon! 🚀</li>'
+            '<li>PyMon will open with the main window</li>'
+            '<li>Click on <span style="color: #4ecca3; font-weight: bold;">"Add Character"</span> '
+            'in the sidebar</li>'
+            '<li>You will be redirected to the EVE Online login page</li>'
+            '<li>Log in and authorize access</li>'
+            '<li>Your character will automatically appear in PyMon! 🚀</li>'
             '</ol>'
         )
         next_steps.setTextFormat(Qt.RichText)
@@ -443,9 +442,9 @@ class CompletePage(QWizardPage):
         layout.addItem(QSpacerItem(0, 12, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
         layout.addWidget(_info_box(
-            "💡 <b>Tipp:</b> Du kannst die Client ID jederzeit in den "
-            "Einstellungen ändern. Das Tutorial kann über "
-            "<b>Hilfe → Einrichtungsassistent</b> erneut aufgerufen werden."
+            "💡 <b>Tip:</b> You can change the Client ID in the settings "
+            "at any time. The tutorial can be reopened via "
+            "<b>Help → Setup Wizard</b>."
         ))
 
         layout.addItem(QSpacerItem(0, 0, QSizePolicy.Minimum, QSizePolicy.Expanding))
@@ -505,11 +504,11 @@ class SetupWizard(QWizard):
         self.addPage(self.client_id_page)
         self.addPage(self.complete_page)
 
-        # Button labels in German
-        self.setButtonText(QWizard.NextButton, "Weiter  →")
-        self.setButtonText(QWizard.BackButton, "←  Zurück")
-        self.setButtonText(QWizard.FinishButton, "✅  Fertigstellen")
-        self.setButtonText(QWizard.CancelButton, "Abbrechen")
+        # Button labels in English
+        self.setButtonText(QWizard.NextButton, "Next  →")
+        self.setButtonText(QWizard.BackButton, "←  Back")
+        self.setButtonText(QWizard.FinishButton, "✅  Finish")
+        self.setButtonText(QWizard.CancelButton, "Cancel")
 
     def accept(self) -> None:
         """Save the client ID to config when wizard finishes."""
@@ -524,11 +523,11 @@ class SetupWizard(QWizard):
         """Handle cancel – ask for confirmation."""
         reply = QMessageBox.question(
             self,
-            "Einrichtung abbrechen",
-            "Ohne Client ID kann PyMon keine Charakterdaten abrufen.\n\n"
-            "Du kannst den Einrichtungsassistenten jederzeit über\n"
-            "Hilfe → Einrichtungsassistent erneut starten.\n\n"
-            "Möchtest du wirklich abbrechen?",
+            "Cancel Setup",
+            "Without a Client ID, PyMon cannot fetch character data.\n\n"
+            "You can restart the setup wizard at any time via\n"
+            "Help → Setup Wizard.\n\n"
+            "Do you really want to cancel?",
             QMessageBox.Yes | QMessageBox.No,
             QMessageBox.No,
         )
