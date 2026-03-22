@@ -74,7 +74,7 @@ class EmailNotifier:
         <html><body style="background:#0d1117;color:#c9d1d9;font-family:Arial,sans-serif;padding:20px">
         <h2 style="color:#4ecca3">✅ Skill abgeschlossen</h2>
         <table style="border-collapse:collapse">
-            <tr><td style="padding:4px 12px;color:#8b949e">Charakter:</td>
+            <tr><td style="padding:4px 12px;color:#8b949e">Character:</td>
                 <td style="padding:4px 12px"><b>{character_name}</b></td></tr>
             <tr><td style="padding:4px 12px;color:#8b949e">Skill:</td>
                 <td style="padding:4px 12px"><b>{skill_name}</b></td></tr>
@@ -94,8 +94,8 @@ class EmailNotifier:
         body_html = f"""
         <html><body style="background:#0d1117;color:#c9d1d9;font-family:Arial,sans-serif;padding:20px">
         <h2 style="color:#e74c3c">⚠️ Skill Queue leer</h2>
-        <p>Der Charakter <b>{character_name}</b> hat keine Skills mehr in der Warteschlange!</p>
-        <p style="color:#8b949e">Bitte logge dich ein und füge neue Skills hinzu.</p>
+        <p>The character <b>{character_name}</b> has no more skills in the training queue!</p>
+        <p style="color:#8b949e">Please log in and add new skills to the queue.</p>
         <p style="color:#8b949e;margin-top:20px">— PyMon (EVEMon in Python)</p>
         </body></html>
         """
@@ -107,7 +107,7 @@ class EmailNotifier:
         body_html = """
         <html><body style="background:#0d1117;color:#c9d1d9;font-family:Arial,sans-serif;padding:20px">
         <h2 style="color:#4ecca3">✅ Test erfolgreich</h2>
-        <p>Die E-Mail-Benachrichtigungen sind korrekt konfiguriert.</p>
+        <p>Email notifications are configured correctly.</p>
         <p style="color:#8b949e;margin-top:20px">— PyMon (EVEMon in Python)</p>
         </body></html>
         """

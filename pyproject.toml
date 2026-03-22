@@ -52,9 +52,9 @@ build = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/GeneraBlack/PyMon"
-Repository = "https://github.com/GeneraBlack/PyMon"
-"Bug Tracker" = "https://github.com/GeneraBlack/PyMon/issues"
+Homepage = "https://github.com/ICU184/PyMon"
+Repository = "https://github.com/ICU184/PyMon"
+"Bug Tracker" = "https://github.com/ICU184/PyMon/issues"
 
 [project.scripts]
 pymon = "pymon.__main__:main"

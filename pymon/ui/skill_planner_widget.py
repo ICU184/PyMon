@@ -116,7 +116,7 @@ class SkillPlannerWidget(QWidget):
         # Search
         search_layout = QHBoxLayout()
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Skill suchen...")
+        self.search_input.setPlaceholderText("Search skill...")
         self.search_input.textChanged.connect(self._on_search)
         search_layout.addWidget(self.search_input)
         left_layout.addLayout(search_layout)
@@ -592,7 +592,7 @@ class SkillPlannerWidget(QWidget):
         """Refresh the plan ComboBox from DB."""
         self.plan_combo.blockSignals(True)
         self.plan_combo.clear()
-        self.plan_combo.addItem("Neuer Plan")
+        self.plan_combo.addItem("New Plan")
 
         if self.db and self._character_id:
             plans = self.db.list_skill_plans(self._character_id)
@@ -609,7 +609,7 @@ class SkillPlannerWidget(QWidget):
 
         idx = self.plan_combo.currentIndex()
         if idx == 0:
-            # "Neuer Plan" selected
+            # "New Plan" selected
             return
 
         plan_name = self.plan_combo.currentData()
@@ -648,17 +648,17 @@ class SkillPlannerWidget(QWidget):
         """Save current plan to DB."""
         if not self.db or not self._character_id:
             QMessageBox.warning(
-                self, "Speichern",
-                "Kein Charakter angemeldet. Bitte zuerst einloggen.",
+                self, "Save",
+                "No character logged in. Please log in first.",
             )
             return
 
         name = self._plan.name.strip()
-        if not name or name == "Neuer Plan":
+        if not name or name == "New Plan":
             name, ok = QInputDialog.getText(
-                self, "Plan speichern",
-                "Name für den Plan:",
-                text=self._plan.name if self._plan.name != "Neuer Plan" else "",
+                self, "Save Plan",
+                "Name for the plan:",
+                text=self._plan.name if self._plan.name != "New Plan" else "",
             )
             if not ok or not name.strip():
                 return
@@ -691,25 +691,25 @@ class SkillPlannerWidget(QWidget):
                 break
 
         QMessageBox.information(
-            self, "Gespeichert",
-            f"Plan '{name}' mit {len(entries)} Skills gespeichert.",
+            self, "Saved",
+            f"Plan '{name}' with {len(entries)} skills saved.",
         )
 
     def _new_plan(self) -> None:
         """Create a new empty plan."""
         if self._plan.entries and self._plan_dirty:
             reply = QMessageBox.question(
-                self, "Neuer Plan",
-                "Aktueller Plan hat ungespeicherte Änderungen.\n"
-                "Trotzdem neuen Plan erstellen?",
+                self, "New Plan",
+                "Current plan has unsaved changes.\n"
+                "Create new plan anyway?",
             )
             if reply != QMessageBox.StandardButton.Yes:
                 return
 
-        self._plan = SkillPlan(name="Neuer Plan")
+        self._plan = SkillPlan(name="New Plan")
         self._plan_dirty = False
         self.plan_name_input.blockSignals(True)
-        self.plan_name_input.setText("Neuer Plan")
+        self.plan_name_input.setText("New Plan")
         self.plan_name_input.blockSignals(False)
         self.plan_combo.blockSignals(True)
         self.plan_combo.setCurrentIndex(0)
@@ -724,8 +724,8 @@ class SkillPlannerWidget(QWidget):
         idx = self.plan_combo.currentIndex()
         if idx <= 0:
             QMessageBox.information(
-                self, "Löschen",
-                "Kein gespeicherter Plan ausgewählt.",
+                self, "Delete",
+                "No saved plan selected.",
             )
             return
 
@@ -734,8 +734,8 @@ class SkillPlannerWidget(QWidget):
             return
 
         reply = QMessageBox.question(
-            self, "Plan löschen",
-            f"Plan '{plan_name}' unwiderruflich löschen?",
+            self, "Delete Plan",
+            f"Plan '{plan_name}' permanently delete?",
         )
         if reply != QMessageBox.StandardButton.Yes:
             return
@@ -752,14 +752,14 @@ class SkillPlannerWidget(QWidget):
         """Export current plan as JSON file."""
         if not self._plan.entries:
             QMessageBox.information(
-                self, "Export", "Der Plan ist leer."
+                self, "Export", "The plan is empty."
             )
             return
 
         default_name = self._plan.name.replace(" ", "_") + ".json"
         path, _ = QFileDialog.getSaveFileName(
-            self, "Plan exportieren", default_name,
-            "JSON Dateien (*.json);;Alle Dateien (*)",
+            self, "Export Plan", default_name,
+            "JSON Files (*.json);;All Files (*)",
         )
         if not path:
             return
@@ -788,11 +788,11 @@ class SkillPlannerWidget(QWidget):
             QMessageBox.information(
                 self, "Export",
                 f"Plan '{self._plan.name}' mit {len(self._plan.entries)} "
-                f"Skills exportiert nach:\n{path}",
+                f"Skills exported to:\n{path}",
             )
         except Exception as exc:
             QMessageBox.critical(
-                self, "Export-Fehler", f"Fehler beim Exportieren:\n{exc}"
+                self, "Export Error", f"Error exporting:\n{exc}"
             )
 
     def _import_plan(self) -> None:

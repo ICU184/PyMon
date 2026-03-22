@@ -30,9 +30,9 @@ logger = logging.getLogger(__name__)
 
 def _fmt_isk(value: float) -> str:
     if value >= 1_000_000_000:
-        return f"{value / 1_000_000_000:,.2f} Mrd"
+        return f"{value / 1_000_000_000:,.2f} Bil"
     if value >= 1_000_000:
-        return f"{value / 1_000_000:,.2f} Mio"
+        return f"{value / 1_000_000:,.2f} Mil"
     if value >= 1_000:
         return f"{value:,.1f}"
     return f"{value:,.2f}"
@@ -70,14 +70,14 @@ class TradeTrackerWidget(QWidget):
         content.setSpacing(8)
 
         # ── Summary KPIs ──
-        kpi_group = QGroupBox("Handels\u00fcbersicht")
+        kpi_group = QGroupBox("Trade Overview")
         kpi_group.setProperty("cssClass", "market-card")
         kpi_layout = QHBoxLayout(kpi_group)
 
-        self._lbl_bought = self._make_kpi("Gesamteinkauf", "---")
-        self._lbl_sold = self._make_kpi("Gesamtverkauf", "---")
-        self._lbl_profit = self._make_kpi("Profit / Verlust", "---")
-        self._lbl_items = self._make_kpi("Gehandelte Items", "---")
+        self._lbl_bought = self._make_kpi("Total Bought", "---")
+        self._lbl_sold = self._make_kpi("Total Sold", "---")
+        self._lbl_profit = self._make_kpi("Profit / Loss", "---")
+        self._lbl_items = self._make_kpi("Traded Items", "---")
 
         for w in (self._lbl_bought, self._lbl_sold, self._lbl_profit, self._lbl_items):
             kpi_layout.addWidget(w)
@@ -86,7 +86,7 @@ class TradeTrackerWidget(QWidget):
         # ── Filter ──
         filter_row = QHBoxLayout()
         self._filter_input = QLineEdit()
-        self._filter_input.setPlaceholderText("\U0001f50d Trade filtern\u2026")
+        self._filter_input.setPlaceholderText("\U0001f50d Filter trades\u2026")
         self._filter_input.textChanged.connect(self._apply_filter)
         filter_row.addWidget(self._filter_input, 1)
         content.addLayout(filter_row)
@@ -95,9 +95,9 @@ class TradeTrackerWidget(QWidget):
         self._table = QTableWidget()
         self._table.setColumnCount(9)
         self._table.setHorizontalHeaderLabels([
-            "Item", "Gekauft (Stk)", "Einkauf (\u2211)",
-            "Ø Einkauf", "Verkauft (Stk)", "Verkauf (\u2211)",
-            "Ø Verkauf", "Profit", "Marge %",
+            "Item", "Bought (Qty)", "Bought (\u2211)",
+            "Ø Bought", "Sold (Qty)", "Sold (\u2211)",
+            "Ø Sold", "Profit", "Margin %",
         ])
         tracker_hdr = self._table.horizontalHeader()
         tracker_hdr.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)

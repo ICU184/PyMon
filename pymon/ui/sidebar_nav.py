@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
 class TabGroup:
     """Definition of a logical tab group."""
     key: str               # internal id, e.g. "character"
-    label: str             # display name, e.g. "Charakter"
+    label: str             # display name, e.g. "Character"
     icon: str              # emoji/icon character
     tab_names: list[str] = field(default_factory=list)
     collapsed: bool = False

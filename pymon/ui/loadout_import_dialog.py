@@ -188,7 +188,7 @@ class LoadoutImportDialog(QDialog):
         self._add_btn.setEnabled(False)
         bottom.addWidget(self._add_btn)
         bottom.addStretch()
-        cancel_btn = QPushButton("Schließen")
+        cancel_btn = QPushButton("Close")
         cancel_btn.setObjectName("cancel")
         cancel_btn.clicked.connect(self.reject)
         bottom.addWidget(cancel_btn)
@@ -198,7 +198,7 @@ class LoadoutImportDialog(QDialog):
         """Parse the EFT text and show required skills."""
         text = self._input.toPlainText().strip()
         if not text:
-            self._info_label.setText("⚠ Bitte EFT-Text einfügen")
+            self._info_label.setText("⚠ Please paste EFT text")
             return
 
         fitting = parse_eft(text)

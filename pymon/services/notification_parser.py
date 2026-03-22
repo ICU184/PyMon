@@ -19,7 +19,7 @@ _NOTIFICATION_CATEGORIES: dict[str, tuple[str, str]] = {
     "CorpWarRetractedMsg": ("🕊️", "Corp-Krieg zurückgezogen"),
     "CorpWarSurrenderMsg": ("🏳️", "Corp-Kapitulation"),
     "WarAdopted": ("⚔️", "Krieg übernommen"),
-    "WarDeclared": ("⚔️", "Krieg erklärt"),
+    "WarDeclared": ("⚔️", "War Declared"),
     "WarInherited": ("⚔️", "Krieg geerbt"),
     "WarRetractedByConcord": ("🕊️", "Krieg von CONCORD zurückgezogen"),
 
@@ -62,11 +62,11 @@ _NOTIFICATION_CATEGORIES: dict[str, tuple[str, str]] = {
     "CharAppAcceptMsg": ("✅", "Bewerbung angenommen"),
     "CharAppRejectMsg": ("❌", "Bewerbung abgelehnt"),
     "CharAppWithdrawMsg": ("↩️", "Bewerbung zurückgezogen"),
-    "CharLeftCorpMsg": ("👋", "Charakter hat Corp verlassen"),
+    "CharLeftCorpMsg": ("👋", "Character left corporation"),
     "CorpKicked": ("🚪", "Aus Corp geworfen"),
     "CorpNewCEOMsg": ("👑", "Neuer CEO"),
     "CorpDividendMsg": ("💰", "Corp-Dividende"),
-    "CorpTaxChangeMsg": ("📊", "Corp-Steuern geändert"),
+    "CorpTaxChangeMsg": ("📊", "Corp Taxn geändert"),
     "CorpVoteCEORevokedMsg": ("🗳️", "CEO-Abstimmung aufgehoben"),
     "CorpNewsMsg": ("📰", "Corp-Nachricht"),
 
@@ -102,7 +102,7 @@ _NOTIFICATION_CATEGORIES: dict[str, tuple[str, str]] = {
     "IncursionCompletedMsg": ("👾", "Incursion abgeschlossen"),
 
     # Loyalty Store / Offers
-    "LocateCharMsg": ("🔍", "Charakter geortet"),
+    "LocateCharMsg": ("🔍", "Character located"),
 
     # Misc
     "CloneActivationMsg": ("🧬", "Klon aktiviert"),
@@ -115,7 +115,7 @@ _NOTIFICATION_CATEGORIES: dict[str, tuple[str, str]] = {
     "ExpertSystemExpired": ("📚", "Expert System abgelaufen"),
 
     # Billing
-    "BillOutOfMoneyMsg": ("💸", "Kein Geld für Rechnung"),
+    "BillOutOfMoneyMsg": ("💸", "Insufficient funds for bill"),
     "BillPaidCorpAllMsg": ("💰", "Corp-Rechnung bezahlt"),
     "CharMedal": ("🏅", "Medaille erhalten"),
 }
@@ -153,9 +153,9 @@ def get_notification_category(notification_type: str) -> str:
     elif "insurance" in t:
         return "Versicherung"
     elif "clone" in t or "skill" in t:
-        return "Charakter"
+        return "Character"
     elif "contact" in t:
-        return "Kontakte"
+        return "Contacts"
     elif "bill" in t or "dividend" in t:
         return "Finanzen"
     return "Sonstiges"

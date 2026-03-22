@@ -44,7 +44,7 @@ class SkillsPieChartWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        title = QLabel("📊 SP-Verteilung nach Skill-Gruppe")
+        title = QLabel("📊 SP Distribution by Skill Group")
         title.setProperty("cssClass", "widget-title")
         layout.addWidget(title)
 
@@ -74,21 +74,21 @@ class SkillsPieChartWidget(QWidget):
             skills: List of SkillInfo dataclass instances with group_name, skillpoints_in_skill
         """
         if not skills:
-            self._summary.setText("Keine Skill-Daten vorhanden.")
+            self._summary.setText("No skill data available.")
             return
 
         # Aggregate SP by group
         groups: dict[str, int] = defaultdict(int)
         for s in skills:
-            groups[s.group_name or "Unbekannt"] += s.skillpoints_in_skill
+            groups[s.group_name or "Unknown"] += s.skillpoints_in_skill
 
         # Sort descending by SP
         sorted_groups = sorted(groups.items(), key=lambda x: x[1], reverse=True)
         total_sp = sum(v for _, v in sorted_groups)
 
         self._summary.setText(
-            f"{len(sorted_groups)} Gruppen  |  {len(skills)} Skills  |  "
-            f"{total_sp:,} SP gesamt"
+            f"{len(sorted_groups)} Groups  |  {len(skills)} Skills  |  "
+            f"{total_sp:,} SP total"
         )
 
         self._draw_bars(sorted_groups, total_sp)

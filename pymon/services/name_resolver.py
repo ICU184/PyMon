@@ -143,7 +143,7 @@ class NameResolver:
             deleted = self.db.conn.execute(
                 "DELETE FROM resolved_names WHERE name LIKE '%#%' "
                 "AND (name LIKE '#%' OR name LIKE 'Unknown %#%' "
-                "OR name LIKE 'Station #%' OR name LIKE 'Standort #%')"
+                "OR name LIKE 'Station #%' OR name LIKE 'Location #%')"
             ).rowcount
             if deleted:
                 self.db.conn.commit()

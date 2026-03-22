@@ -337,7 +337,7 @@ class MarketService:
             elif rec.sell_price > 0:
                 rec.recommendation = "Sell Order aufgeben"
             else:
-                rec.recommendation = "Halten (kein Markt)"
+                rec.recommendation = "Hold (no market)"
 
             # Daily volume from history
             try:

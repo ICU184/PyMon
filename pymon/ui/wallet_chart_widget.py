@@ -47,9 +47,9 @@ class WalletChartWidget(QWidget):
 
         header.addStretch()
 
-        header.addWidget(QLabel("Zeitraum:"))
+        header.addWidget(QLabel("Timeframe:"))
         self.range_combo = QComboBox()
-        self.range_combo.addItems(["Alles", "7 Tage", "14 Tage", "30 Tage"])
+        self.range_combo.addItems(["All", "7 Days", "14 Days", "30 Days"])
         self.range_combo.currentIndexChanged.connect(self._on_range_changed)
         header.addWidget(self.range_combo)
 
@@ -67,7 +67,7 @@ class WalletChartWidget(QWidget):
         self.plot_widget.setMinimumHeight(250)
         self.plot_widget.showGrid(x=True, y=True, alpha=0.15)
         self.plot_widget.setLabel("left", "ISK", color=Colors.TEXT_DIM)
-        self.plot_widget.setLabel("bottom", "Zeit", color=Colors.TEXT_DIM)
+        self.plot_widget.setLabel("bottom", "Time", color=Colors.TEXT_DIM)
         self.plot_widget.getAxis("left").setStyle(tickFont=QFont("Segoe UI", 8))
         self.plot_widget.getAxis("bottom").setStyle(tickFont=QFont("Segoe UI", 8))
 
@@ -107,15 +107,15 @@ class WalletChartWidget(QWidget):
         self.bar_widget.clear()
 
         if not self._journal_data:
-            self.balance_label.setText("💰 Wallet Chart — Keine Daten")
+            self.balance_label.setText("💰 Wallet Chart — No Data")
             self.summary_label.setText("")
             return
 
         # Filter by time range
         journal = list(reversed(self._journal_data))  # oldest first
         range_text = self.range_combo.currentText()
-        if range_text != "Alles" and journal:
-            days = {"7 Tage": 7, "14 Tage": 14, "30 Tage": 30}.get(range_text, 999)
+        if range_text != "All" and journal:
+            days = {"7 Days": 7, "14 Days": 14, "30 Days": 30}.get(range_text, 999)
             now = datetime.now(UTC)
             journal = [
                 j for j in journal
@@ -123,7 +123,7 @@ class WalletChartWidget(QWidget):
             ]
 
         if not journal:
-            self.balance_label.setText("💰 Wallet Chart — Keine Daten im Zeitraum")
+            self.balance_label.setText("💰 Wallet Chart — No Data in Timeframe")
             self.summary_label.setText("")
             return
 
@@ -162,10 +162,10 @@ class WalletChartWidget(QWidget):
         self.balance_label.setText(f"💰 {latest_balance:,.2f} ISK")
         self.summary_label.setText(
             f"<table width='100%'><tr>"
-            f"<td>📈 Einnahmen: <span style='color:{Colors.ACCENT}'>+{total_income:,.2f} ISK</span></td>"
-            f"<td>📉 Ausgaben: <span style='color:{Colors.RED}'>{total_expense:,.2f} ISK</span></td>"
-            f"<td>📊 Bilanz: <span style='color:{net_color}'>{net:+,.2f} ISK</span></td>"
-            f"<td>📝 Einträge: {len(journal)}</td>"
+            f"<td>📈 Income: <span style='color:{Colors.ACCENT}'>+{total_income:,.2f} ISK</span></td>"
+            f"<td>📉 Expenses: <span style='color:{Colors.RED}'>{total_expense:,.2f} ISK</span></td>"
+            f"<td>📊 Balance: <span style='color:{net_color}'>{net:+,.2f} ISK</span></td>"
+            f"<td>📝 Entries: {len(journal)}</td>"
             f"</tr></table>"
         )
 

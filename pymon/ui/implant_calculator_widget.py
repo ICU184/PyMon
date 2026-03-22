@@ -97,13 +97,13 @@ class ImplantCalculatorWidget(QWidget):
         left_layout = QVBoxLayout(left)
         left_layout.setContentsMargins(0, 0, 0, 0)
 
-        title = QLabel("💉 Aktive Implantate")
+        title = QLabel("💉 Active Implants")
         title.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
         title.setProperty("cssClass", "widget-title")
         left_layout.addWidget(title)
 
         self.implant_tree = QTreeWidget()
-        self.implant_tree.setHeaderLabels(["Slot", "Implantat", "Bonus"])
+        self.implant_tree.setHeaderLabels(["Slot", "Implant", "Bonus"])
         self.implant_tree.setColumnWidth(0, 50)
         self.implant_tree.setColumnWidth(1, 280)
         self.implant_tree.setAlternatingRowColors(True)
@@ -115,7 +115,7 @@ class ImplantCalculatorWidget(QWidget):
         # ── Right: Attribute summary & training impact ──
         right_scroll = QScrollArea()
         right_scroll.setWidgetResizable(True)
-        self.detail_label = QLabel("Lade Implantate...")
+        self.detail_label = QLabel("Loading implants...")
         self.detail_label.setTextFormat(Qt.TextFormat.RichText)
         self.detail_label.setWordWrap(True)
         self.detail_label.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -153,7 +153,7 @@ class ImplantCalculatorWidget(QWidget):
         if not self._implant_ids:
             self.detail_label.setText(
                 "<h3>💉 Implant Calculator</h3>"
-                "<p style='color:{Colors.TEXT_DIM}'>Keine aktiven Implantate.</p>"
+                "<p style='color:{Colors.TEXT_DIM}'>No active implants.</p>"
             )
             return
 
@@ -229,13 +229,13 @@ class ImplantCalculatorWidget(QWidget):
         total_bonuses: dict[str, float],
     ) -> None:
         """Build the attribute summary and training impact HTML."""
-        html = "<h3>🧮 Attribut-Übersicht</h3>"
+        html = "<h3>🧮 Attribute Summary</h3>"
 
         # Attribute comparison table
         html += (
             "<table cellspacing='6' style='margin:8px 0'>"
-            "<tr><th style='text-align:left'>Attribut</th>"
-            "<th>Basis</th><th>Bonus</th><th>Gesamt</th></tr>"
+            "<tr><th style='text-align:left'>Attribute</th>"
+            "<th>Base</th><th>Bonus</th><th>Total</th></tr>"
         )
 
         effective: dict[str, float] = {}
@@ -260,7 +260,7 @@ class ImplantCalculatorWidget(QWidget):
         html += "</table>"
 
         # Training speed comparison
-        html += "<h3>⏱️ Trainings-Geschwindigkeit</h3>"
+        html += "<h3>⏱️ Training Speed</h3>"
 
         # SP/min formula: primary_attr + secondary_attr/2
         # We show SP/hour for common attribute combinations
@@ -276,7 +276,7 @@ class ImplantCalculatorWidget(QWidget):
         html += (
             "<table cellspacing='6' style='margin:8px 0'>"
             "<tr><th style='text-align:left'>Primary / Secondary</th>"
-            "<th>Basis SP/h</th><th>Mit Implantaten SP/h</th><th>Steigerung</th></tr>"
+            "<th>Base SP/h</th><th>With Implants SP/h</th><th>Gain</th></tr>"
         )
 
         for prim_name, sec_name, prim_key, sec_key in attr_combos:
@@ -310,8 +310,8 @@ class ImplantCalculatorWidget(QWidget):
         html += "</table>"
 
         # Training time comparison for example skills
-        html += "<h3>📊 Beispiel-Trainingszeiten</h3>"
-        html += "<p style='color:{Colors.TEXT_DIM}'>Vergleich: Basis-Attribute vs. mit Implantaten</p>"
+        html += "<h3>📊 Example Training Times</h3>"
+        html += "<p style='color:{Colors.TEXT_DIM}'>Comparison: Base Attributes vs. With Implants</p>"
 
         # SP requirements by skill level
         sp_per_level = {1: 250, 2: 1415, 3: 8000, 4: 45255, 5: 256000}
@@ -319,7 +319,7 @@ class ImplantCalculatorWidget(QWidget):
 
         html += (
             "<table cellspacing='6' style='margin:8px 0'>"
-            "<tr><th>Skill (INT/MEM)</th><th>Basis</th><th>Mit Implantaten</th><th>Ersparnis</th></tr>"
+            "<tr><th>Skill (INT/MEM)</th><th>Base</th><th>With Implants</th><th>Saved</th></tr>"
         )
 
         base_prim = self._base_attributes.get("intelligence", 17)
@@ -352,7 +352,7 @@ class ImplantCalculatorWidget(QWidget):
         hw_implants = [i for i in implant_data if not i["bonuses"]]
 
         if attr_implants:
-            html += "<h3>💉 Attribut-Implantate</h3>"
+            html += "<h3>💉 Attribute Implants</h3>"
             for imp in attr_implants:
                 bonuses_str = ", ".join(
                     f"<span style='color:{ATTR_COLORS.get(k, '#c9d1d9')}'>"
@@ -367,7 +367,7 @@ class ImplantCalculatorWidget(QWidget):
                 )
 
         if hw_implants:
-            html += "<h3>⚡ Hardwiring-Implantate</h3>"
+            html += "<h3>⚡ Hardwiring Implants</h3>"
             for imp in hw_implants:
                 html += (
                     f"<div style='margin:4px 0;padding:8px;background:#161b22;"

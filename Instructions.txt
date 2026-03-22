@@ -1,0 +1,33 @@
+Option 1: Bypass for the current session (quickest)
+Run this in the same PowerShell window, then activate:
+
+powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.venv\Scripts\Activate.ps1
+
+Option 3: Change the policy permanently for your user
+powershell
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+1. Set up a virtual environment (if you haven't already)
+powershell
+cd c:\Users\user\Documents\Python\PyMon
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+2. Install PyMon in editable mode
+powershell
+pip install -e .
+This installs all dependencies (PySide6, httpx, etc.) and registers the pymon command.
+
+3. Run it
+powershell
+pymon
+That's it! The entry point is defined in 
+
+pyproject.toml
+ as pymon.__main__:main, so the pymon command will launch the app.
+
+If you want to build a standalone .exe instead:
+powershell
+pip install -e ".[build]"
+pyinstaller pymon.spec

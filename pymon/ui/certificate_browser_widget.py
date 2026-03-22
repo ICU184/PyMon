@@ -65,15 +65,15 @@ class CertificateBrowserWidget(QWidget):
 
         # Filter bar
         filter_bar = QHBoxLayout()
-        filter_bar.addWidget(QLabel("Gruppe:"))
+        filter_bar.addWidget(QLabel("Group:"))
         self.group_combo = QComboBox()
         self.group_combo.setMinimumWidth(200)
         self.group_combo.currentIndexChanged.connect(self._on_group_changed)
         filter_bar.addWidget(self.group_combo)
 
-        filter_bar.addWidget(QLabel("Suche:"))
+        filter_bar.addWidget(QLabel("Search:"))
         self.search_edit = QLineEdit()
-        self.search_edit.setPlaceholderText("Zertifikat suchen...")
+        self.search_edit.setPlaceholderText("Search certificate...")
         self.search_edit.textChanged.connect(self._on_search_changed)
         filter_bar.addWidget(self.search_edit)
         filter_bar.addStretch()
@@ -84,7 +84,7 @@ class CertificateBrowserWidget(QWidget):
 
         # Left: certificate tree
         self.cert_tree = QTreeWidget()
-        self.cert_tree.setHeaderLabels(["Zertifikat", "Status"])
+        self.cert_tree.setHeaderLabels(["Certificate", "Status"])
         self.cert_tree.setColumnWidth(0, 300)
         self.cert_tree.setAlternatingRowColors(True)
         self.cert_tree.setFont(QFont("Segoe UI", 10))
@@ -94,7 +94,7 @@ class CertificateBrowserWidget(QWidget):
         # Right: certificate detail
         detail_scroll = QScrollArea()
         detail_scroll.setWidgetResizable(True)
-        self.cert_detail_label = QLabel("Wähle ein Zertifikat aus der Liste.")
+        self.cert_detail_label = QLabel("Select a certificate from the list.")
         self.cert_detail_label.setTextFormat(Qt.TextFormat.RichText)
         self.cert_detail_label.setWordWrap(True)
         self.cert_detail_label.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -109,7 +109,7 @@ class CertificateBrowserWidget(QWidget):
         cert_splitter.setStretchFactor(1, 2)
         cert_layout.addWidget(cert_splitter)
 
-        self.sub_tabs.addTab(cert_widget, "📜 Zertifikate")
+        self.sub_tabs.addTab(cert_widget, "📜 Certificates")
 
         # --- Tab 2: Ship Masteries ---
         mastery_widget = QWidget()
@@ -118,9 +118,9 @@ class CertificateBrowserWidget(QWidget):
 
         # Filter bar for masteries
         m_filter_bar = QHBoxLayout()
-        m_filter_bar.addWidget(QLabel("Suche:"))
+        m_filter_bar.addWidget(QLabel("Search:"))
         self.ship_search_edit = QLineEdit()
-        self.ship_search_edit.setPlaceholderText("Schiff suchen...")
+        self.ship_search_edit.setPlaceholderText("Search ship...")
         self.ship_search_edit.textChanged.connect(self._on_ship_search_changed)
         m_filter_bar.addWidget(self.ship_search_edit)
         m_filter_bar.addStretch()
@@ -130,7 +130,7 @@ class CertificateBrowserWidget(QWidget):
         mastery_splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self.ship_tree = QTreeWidget()
-        self.ship_tree.setHeaderLabels(["Schiff", "Mastery"])
+        self.ship_tree.setHeaderLabels(["Ship", "Mastery"])
         self.ship_tree.setColumnWidth(0, 300)
         self.ship_tree.setAlternatingRowColors(True)
         self.ship_tree.setFont(QFont("Segoe UI", 10))
@@ -139,7 +139,7 @@ class CertificateBrowserWidget(QWidget):
 
         m_detail_scroll = QScrollArea()
         m_detail_scroll.setWidgetResizable(True)
-        self.mastery_detail_label = QLabel("Wähle ein Schiff aus der Liste.")
+        self.mastery_detail_label = QLabel("Select a ship from the list.")
         self.mastery_detail_label.setTextFormat(Qt.TextFormat.RichText)
         self.mastery_detail_label.setWordWrap(True)
         self.mastery_detail_label.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -154,7 +154,7 @@ class CertificateBrowserWidget(QWidget):
         mastery_splitter.setStretchFactor(1, 2)
         mastery_layout.addWidget(mastery_splitter)
 
-        self.sub_tabs.addTab(mastery_widget, "🚀 Schiffs-Masteries")
+        self.sub_tabs.addTab(mastery_widget, "🚀 Ship Masteries")
 
         layout.addWidget(self.sub_tabs)
 
@@ -182,12 +182,12 @@ class CertificateBrowserWidget(QWidget):
         """Load certificate groups into the combo box."""
         self.group_combo.blockSignals(True)
         self.group_combo.clear()
-        self.group_combo.addItem("── Alle Gruppen ──", 0)
+        self.group_combo.addItem("── All Groups ──", 0)
 
         try:
             groups = self.sde.get_certificate_groups()
             for g in groups:
-                name = g.get("group_name") or f"Gruppe #{g['group_id']}"
+                name = g.get("group_name") or f"Group #{g['group_id']}"
                 self.group_combo.addItem(name, g["group_id"])
         except Exception:
             logger.debug("Could not load certificate groups", exc_info=True)
@@ -271,7 +271,7 @@ class CertificateBrowserWidget(QWidget):
                 highest_met = lvl_idx
 
         if highest_met < 0:
-            return "Nicht erreicht"
+            return "Not met"
         return f"{MASTERY_ICONS[highest_met]} {MASTERY_LEVELS[highest_met]}"
 
     def _on_cert_selected(self, current: QTreeWidgetItem | None, _prev: QTreeWidgetItem | None) -> None:
@@ -286,7 +286,7 @@ class CertificateBrowserWidget(QWidget):
         """Display full certificate detail with skill requirements."""
         cert = self.sde.get_certificate(cert_id)
         if not cert:
-            self.cert_detail_label.setText("<p>Zertifikat nicht gefunden.</p>")
+            self.cert_detail_label.setText("<p>Certificate not found.</p>")
             return
 
         name = cert.get("name_en", "Unknown")
@@ -301,11 +301,11 @@ class CertificateBrowserWidget(QWidget):
         skills = self.sde.get_certificate_skills(cert_id)
         if skills:
             html += (
-                "<h3>Skill-Anforderungen</h3>"
+                "<h3>Skill Requirements</h3>"
                 "<table cellspacing='4' style='margin-top:4px'>"
                 "<tr><th style='text-align:left'>Skill</th>"
                 "<th>Basic</th><th>Standard</th><th>Improved</th>"
-                "<th>Advanced</th><th>Elite</th><th>Trainiert</th></tr>"
+                "<th>Advanced</th><th>Elite</th><th>Trained</th></tr>"
             )
             for sk in skills:
                 skill_name = sk.get("skill_name", f"Skill #{sk['skill_type_id']}")
@@ -327,7 +327,7 @@ class CertificateBrowserWidget(QWidget):
         # Recommended ships
         rec_types = self.sde.get_certificate_recommended_types(cert_id)
         if rec_types:
-            html += "<h3>Empfohlene Schiffe</h3><p>"
+            html += "<h3>Recommended Ships</h3><p>"
             ship_names = [r.get("type_name", f"Type #{r['type_id']}") for r in rec_types]
             html += ", ".join(f"<span style='color:{Colors.BLUE}'>{s}</span>" for s in ship_names)
             html += "</p>"
@@ -350,7 +350,7 @@ class CertificateBrowserWidget(QWidget):
         # Group by ship group
         groups: dict[str, list[dict[str, Any]]] = {}
         for ship in ships:
-            gname = ship.get("group_name") or "Unbekannt"
+            gname = ship.get("group_name") or "Unknown"
             groups.setdefault(gname, []).append(ship)
 
         for gname in sorted(groups.keys()):
@@ -430,7 +430,7 @@ class CertificateBrowserWidget(QWidget):
                 break  # Can't skip levels
 
         if highest_met < 0:
-            return "Keine"
+            return "None"
         return f"{MASTERY_ICONS[highest_met]} {MASTERY_LEVELS[highest_met]}"
 
     def _check_certificate_met(self, cert_id: int, mastery_level: int) -> bool:
@@ -469,7 +469,7 @@ class CertificateBrowserWidget(QWidget):
 
         if not masteries:
             self.mastery_detail_label.setText(
-                f"<h2>{ship_name}</h2><p>Keine Mastery-Daten verfügbar.</p>"
+                f"<h2>{ship_name}</h2><p>No mastery data available.</p>"
             )
             return
 
@@ -541,7 +541,7 @@ class CertificateBrowserWidget(QWidget):
                             f"<span style='color:{sk_color}'>{sk_icon}</span> "
                             f"{sk_name} "
                             f"<span style='color:{Colors.TEXT_DIM}'>Lv{req}</span> "
-                            f"(trainiert: <span style='color:{sk_color}'>{trained}</span>)&nbsp;&nbsp;"
+                            f"(trained: <span style='color:{sk_color}'>{trained}</span>)&nbsp;&nbsp;"
                         )
                     html += "</div>"
 

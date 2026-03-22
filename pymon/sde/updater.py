@@ -123,7 +123,7 @@ class SDEDownloadThread(QThread):
             jsonl_dir = self._find_jsonl_dir(extract_dir)
             if jsonl_dir is None:
                 self.finished_err.emit(
-                    "Kein gültiges SDE-JSONL-Verzeichnis im ZIP gefunden"
+                    "No valid SDE JSONL directory found in ZIP"
                 )
                 return
 
@@ -142,7 +142,7 @@ class SDEDownloadThread(QThread):
             import_sde(str(jsonl_dir), str(self.db_path))
 
             build = new_build or 0
-            self.status.emit(f"✓ SDE aktualisiert (Build {build})")
+            self.status.emit(f"✓ SDE updated (Build {build})")
             self.finished_ok.emit(build)
 
         except httpx.HTTPStatusError as e:
@@ -150,7 +150,7 @@ class SDEDownloadThread(QThread):
             logger.error(msg)
             self.finished_err.emit(msg)
         except Exception as e:
-            msg = f"SDE-Update Fehler: {e}"
+            msg = f"SDE update error: {e}"
             logger.exception(msg)
             self.finished_err.emit(msg)
         finally:
@@ -222,7 +222,7 @@ class SDEUpdateDialog:
                 self.detail_label = QLabel("")
                 layout.addWidget(self.detail_label)
 
-                self.cancel_btn = QPushButton("Abbrechen")
+                self.cancel_btn = QPushButton("Cancel")
                 self.cancel_btn.clicked.connect(self._on_cancel)
                 layout.addWidget(self.cancel_btn)
 
@@ -251,7 +251,7 @@ class SDEUpdateDialog:
 
             def on_finished_err(self, msg: str) -> None:
                 self.status_label.setText(f"✗ {msg}")
-                self.cancel_btn.setText("Schließen")
+                self.cancel_btn.setText("Close")
                 self.cancel_btn.clicked.disconnect()
                 self.cancel_btn.clicked.connect(self.reject)
                 self.progress_bar.setRange(0, 1)

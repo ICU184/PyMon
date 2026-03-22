@@ -37,15 +37,15 @@ class IndustryJob:
     def activity_display_name(self) -> str:
         """Human-readable activity name."""
         names = {
-            1: "Herstellung",
-            3: "Zeiteffizienz-Forschung",
-            4: "Materialeffizienz-Forschung",
-            5: "Kopieren",
+            1: "Manufacturing",
+            3: "Time Efficiency Research",
+            4: "Material Efficiency Research",
+            5: "Copying",
             8: "Invention",
-            9: "Reaktion",
+            9: "Reaction",
             11: "Reverse Engineering",
         }
-        return names.get(self.activity_id, f"Aktivität {self.activity_id}")
+        return names.get(self.activity_id, f"Activity {self.activity_id}")
 
 
 @dataclass

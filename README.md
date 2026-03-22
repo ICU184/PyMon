@@ -74,32 +74,32 @@ Built with **Python 3.11+** and **PySide6 (Qt 6)**, PyMon provides a dark-themed
 
 ## 🚀 Installation
 
-### Option A: Windows Installer (empfohlen für Benutzer)
+### Option A: Windows Installer (recommended for users)
 
-1. Gehe zu [**Releases**](https://github.com/GeneraBlack/PyMon/releases/latest)
-2. Lade eine der beiden Varianten herunter:
-   - **`PyMon-x.x.x-Setup.exe`** – Installer mit Startmenü-Eintrag, Desktop-Verknüpfung & optionalem Autostart
-   - **`PyMon-x.x.x-Windows-Portable.zip`** – Portable Version (einfach entpacken und starten)
-3. Starte **PyMon.exe**
-4. Beim ersten Start öffnet sich automatisch der **Einrichtungsassistent**, der dich Schritt für Schritt durch die ESI-API-Einrichtung führt 🧙
+1. Go to [**Releases**](https://github.com/GeneraBlack/PyMon/releases/latest)
+2. Download one of the two variants:
+   - **`PyMon-x.x.x-Setup.exe`** – Installer with Start Menu entry, Desktop shortcut & optional autostart
+   - **`PyMon-x.x.x-Windows-Portable.zip`** – Portable version (simply extract and run)
+3. Launch **PyMon.exe**
+4. On first launch, the **Setup Wizard** opens automatically and guides you step by step through the ESI API setup 🧙
 
-> **Das war's!** Du brauchst kein Python, kein Git, keine Kommandozeile.
+> **That's it!** No Python, no Git, no command line needed.
 
-### Option B: Aus dem Quellcode (für Entwickler)
+### Option B: From Source (for developers)
 
-#### Voraussetzungen
-- **Python 3.11 oder neuer** – [Download](https://www.python.org/downloads/)
+#### Prerequisites
+- **Python 3.11 or newer** – [Download](https://www.python.org/downloads/)
 - **Git** – [Download](https://git-scm.com/downloads)
 
 ```bash
-# Repository klonen
+# Clone the repository
 git clone https://github.com/GeneraBlack/PyMon.git
 cd PyMon
 
-# Virtuelle Umgebung erstellen (empfohlen)
+# Create a virtual environment (recommended)
 python -m venv .venv
 
-# Aktivieren
+# Activate it
 # Windows PowerShell:
 .venv\Scripts\Activate.ps1
 # Windows CMD:
@@ -107,114 +107,115 @@ python -m venv .venv
 # Linux/macOS:
 source .venv/bin/activate
 
-# PyMon installieren
+# Install PyMon
 pip install -e .
 
-# Starten
+# Run
 pymon
 ```
 
 ---
 
-## 🔑 Ersteinrichtung (ESI API Key)
+## 🔑 First-Time Setup (ESI API Key)
 
-Beim **ersten Start** führt dich der eingebaute **Einrichtungsassistent** automatisch durch diese Schritte:
+On **first launch**, the built-in **Setup Wizard** automatically guides you through these steps:
 
-1. Öffne das [EVE Developer Portal](https://developers.eveonline.com/applications)
-2. Erstelle eine neue Application:
-   - **Connection Type**: `Authentication & API Access`
-   - **Callback URL**: `http://localhost:8182/callback`
-   - **Scopes**: Alle auswählen (oder nur die gewünschten)
-3. Kopiere die **Client ID** und füge sie im Wizard ein
-4. Fertig! Klicke auf **"Charakter hinzufügen"** und logge dich via EVE SSO ein
+1. Open the [EVE Developer Portal](https://developers.eveonline.com/applications) and log in with your EVE Online account
+2. Click **"Create New Application"**
+3. Fill in a **Name** (e.g. "PyMon") and an optional **Description**
+4. **Permissions**: Select all scopes (or only the ones you need)
+5. **Callback URL**: Enter `http://localhost:8182/callback`
+6. Click **"Create Application"**
+7. Copy the **Client ID** and paste it into the Setup Wizard
+8. Done! Click **"Add Character"** and log in via EVE SSO
 
-> 💡 Du kannst den Einrichtungsassistenten jederzeit über **Hilfe → Einrichtungsassistent** erneut aufrufen.
+> 💡 You can reopen the Setup Wizard at any time via **Help → Setup Wizard**.
 
 ---
 
-## 🔄 Aktualisierung
+## 🔄 Updating
 
-### Installer-Version
-PyMon prüft beim Start automatisch auf Updates. Alternativ lade einfach den neuesten Installer von der [Releases-Seite](https://github.com/GeneraBlack/PyMon/releases) herunter.
+### Installer Version
+PyMon automatically checks for updates on launch. Alternatively, simply download the latest installer from the [Releases page](https://github.com/GeneraBlack/PyMon/releases).
 
-### Quellcode-Version
+### Source Version
 ```bash
 cd PyMon
 git pull
 pip install -e .
 ```
 
-Deine Einstellungen und Charakterdaten bleiben erhalten.
+Your settings and character data are preserved.
 
 ---
 
-## 🏗️ Entwicklung
+## 🏗️ Development
 
 ```bash
-# Mit Dev-Dependencies installieren
+# Install with dev dependencies
 pip install -e ".[dev]"
 
-# Tests ausführen
+# Run tests
 pytest -v
 
 # Lint
 ruff check pymon/
 
-# Type-Check
+# Type check
 mypy pymon/
 ```
 
-### Projektstruktur
+### Project Structure
 
 ```
 pymon/
-├── pymon/                  # Hauptpaket
-│   ├── __main__.py         # Einstiegspunkt
-│   ├── core/               # App-Lifecycle, Config, Datenbank
+├── pymon/                  # Main package
+│   ├── __main__.py         # Entry point
+│   ├── core/               # App lifecycle, config, database
 │   ├── auth/               # EVE SSO OAuth2 (PKCE)
-│   ├── api/                # 30 ESI API Module (80+ Endpunkte)
-│   ├── sde/                # Static Data Export (SQLite, 65+ Tabellen)
-│   ├── models/             # Datenmodelle (Dataclasses)
-│   ├── services/           # Business-Logik, Name Resolution, Markt
-│   └── ui/                 # PySide6 GUI (25+ Widgets)
-├── tests/                  # Testsuite
-├── pyproject.toml          # Dependencies & Build-Konfiguration
+│   ├── api/                # 30 ESI API modules (80+ endpoints)
+│   ├── sde/                # Static Data Export (SQLite, 65+ tables)
+│   ├── models/             # Data models (dataclasses)
+│   ├── services/           # Business logic, name resolution, market
+│   └── ui/                 # PySide6 GUI (25+ widgets)
+├── tests/                  # Test suite
+├── pyproject.toml          # Dependencies & build configuration
 └── README.md
 ```
 
 ---
 
-## 📦 Standalone-EXE bauen (Windows)
+## 📦 Building a Standalone EXE (Windows)
 
 ```bash
 pip install -e ".[build]"
 pyinstaller pymon.spec
 ```
 
-Die fertige EXE findest du in `dist/PyMon/`.
+The finished EXE can be found in `dist/PyMon/`.
 
 ---
 
-## ⚙️ Konfiguration
+## ⚙️ Configuration
 
-Alle Daten werden lokal in deinem App-Verzeichnis gespeichert:
+All data is stored locally in your app directory:
 - **Windows**: `%LOCALAPPDATA%\PyMon\PyMon\`
 - **Linux**: `~/.local/share/PyMon/`
 - **macOS**: `~/Library/Application Support/PyMon/`
 
-| Einstellung | Beschreibung |
+| Setting | Description |
 |---|---|
-| Client ID | Deine EVE Application Client ID |
-| Aktualisierungsintervall | ESI-Abfrageintervall (Minuten) |
-| Tray-Benachrichtigungen | Skill fertig / Queue leer Benachrichtigungen |
-| E-Mail | SMTP-Einstellungen für E-Mail-Alerts |
-| Cloud Sync | Cloud-Ordner für Backup/Restore |
+| Client ID | Your EVE Application Client ID |
+| Refresh Interval | ESI polling interval (minutes) |
+| Tray Notifications | Skill completed / Queue empty notifications |
+| Email | SMTP settings for email alerts |
+| Cloud Sync | Cloud folder for backup/restore |
 
 ---
 
-## 📄 Lizenz
+## 📄 License
 
-Lizenziert unter der [Apache License 2.0](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).
 
 ## 🙏 Credits
 

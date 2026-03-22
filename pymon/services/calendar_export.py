@@ -116,7 +116,7 @@ def export_ics_file(
         content = generate_ics(character_name, skill_queue, type_names)
         p = Path(path)
         p.write_text(content, encoding="utf-8")
-        return True, f"Kalender exportiert nach:\n{p}"
+        return True, f"Calendar exported to:\n{p}"
     except Exception as e:
         logger.error("ICS export failed", exc_info=True)
         return False, f"Export fehlgeschlagen:\n{e}"

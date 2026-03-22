@@ -591,7 +591,7 @@ class MainWindow(QMainWindow):
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
 
-        self.server_status_label = QLabel("Server-Status: Wird abgefragt...")
+        self.server_status_label = QLabel("Server Status: Fetching...")
         self.status_bar.addPermanentWidget(self.server_status_label)
 
         self.eve_time_label = QLabel("")
@@ -630,10 +630,10 @@ class MainWindow(QMainWindow):
 
         # Tray menu
         tray_menu = QMenu()
-        show_action = tray_menu.addAction("Anzeigen")
+        show_action = tray_menu.addAction("Show")
         show_action.triggered.connect(self._on_tray_show)
         tray_menu.addSeparator()
-        quit_action = tray_menu.addAction("Beenden")
+        quit_action = tray_menu.addAction("Quit")
         quit_action.triggered.connect(self._on_tray_quit)
         self._tray_icon.setContextMenu(tray_menu)
         self._tray_icon.activated.connect(self._on_tray_activated)
@@ -645,6 +645,8 @@ class MainWindow(QMainWindow):
 
     def _update_eve_time(self) -> None:
         """Update EVE time display in status bar (UTC)."""
+        if self._shutting_down:
+            return
         now = datetime.now(UTC)
         self.eve_time_label.setText(f"EVE: {now.strftime('%H:%M:%S')}")
 
@@ -675,7 +677,7 @@ class MainWindow(QMainWindow):
             self.hide()
             self._tray_icon.showMessage(
                 "PyMon",
-                "PyMon läuft im Hintergrund weiter.",
+                "PyMon is still running in the background.",
                 QSystemTrayIcon.MessageIcon.Information,
                 2000,
             )
@@ -721,13 +723,13 @@ class MainWindow(QMainWindow):
         if not self.config.client_id:
             QMessageBox.warning(
                 self,
-                "Client-ID fehlt",
-                "Bitte konfiguriere zuerst deine EVE Application Client-ID.\n\n"
-                "Registriere eine App unter:\nhttps://developers.eveonline.com/applications\n\n"
-                "Setze die Client-ID in der config.json.",
+                "Client ID Missing",
+                "Please configure your EVE Application Client ID first.\n\n"
+                "Register an app at:\nhttps://developers.eveonline.com/applications\n\n"
+                "Set the Client ID in config.json.",
             )
             return
-        self.status_bar.showMessage("SSO Login: Öffne Browser...")
+        self.status_bar.showMessage("SSO Login: Opening browser...")
         self.auth.open_browser_login()
         self._wait_for_sso_callback()
 
@@ -766,14 +768,14 @@ class MainWindow(QMainWindow):
                 if item and item.data(Qt.ItemDataRole.UserRole) == sso_result.character_id:
                     self.char_list.setCurrentRow(i)
                     break
-            self.status_bar.showMessage(f"✓ {sso_result.character_name} hinzugefügt!")
+            self.status_bar.showMessage(f"✓ {sso_result.character_name} added!")
         except Exception as e:
             logger.error("Failed to store SSO tokens", exc_info=True)
-            self.status_bar.showMessage(f"✗ Fehler beim Speichern: {e}")
+            self.status_bar.showMessage(f"✗ Error saving tokens: {e}")
 
     def _on_sso_login_failed(self, error_msg: str) -> None:
         """Handle failed SSO login on the main thread."""
-        self.status_bar.showMessage(f"✗ SSO Login fehlgeschlagen: {error_msg}")
+        self.status_bar.showMessage(f"✗ SSO Login failed: {error_msg}")
 
     def _on_remove_character(self) -> None:
         """Remove the selected character."""
@@ -784,8 +786,8 @@ class MainWindow(QMainWindow):
         name = item.text()
         reply = QMessageBox.question(
             self,
-            "Charakter entfernen",
-            f"Möchtest du '{name}' wirklich entfernen?",
+            "Remove Character",
+            f"Do you really want to remove '{name}'?",
         )
         if reply == QMessageBox.StandardButton.Yes:
             self.token_manager.remove_character(character_id)
@@ -798,7 +800,7 @@ class MainWindow(QMainWindow):
         name, ok = QInputDialog.getText(
             self,
             "Blank Character",
-            "Name für den virtuellen Charakter:",
+            "Name for the virtual character:",
             text="Blank Character",
         )
         if not ok or not name.strip():
@@ -821,7 +823,7 @@ class MainWindow(QMainWindow):
             )
             self.db.conn.commit()
         except Exception as e:
-            QMessageBox.critical(self, "Fehler", f"Konnte Charakter nicht anlegen:\n{e}")
+            QMessageBox.critical(self, "Error", f"Could not create character:\n{e}")
             return
 
         self._load_characters()
@@ -841,9 +843,9 @@ class MainWindow(QMainWindow):
         self.skill_planner.set_character_data(attrs, {}, blank_id)
         self.overview_label.setText(
             f"<h2>🧪 {name}</h2>"
-            "<p>Virtueller Charakter für Skill-Plan-Simulation.</p>"
-            "<p>Alle Skills auf Level 0 — nutze den Skill Planner, um Pläne zu erstellen.</p>"
-            "<table><tr><th>Attribut</th><th>Wert</th></tr>"
+            "<p>Virtual character for skill plan simulation.</p>"
+            "<p>All skills at level 0 — use the Skill Planner to create plans.</p>"
+            "<table><tr><th>Attribute</th><th>Value</th></tr>"
             "<tr><td>Intelligence</td><td>17</td></tr>"
             "<tr><td>Memory</td><td>17</td></tr>"
             "<tr><td>Perception</td><td>17</td></tr>"
@@ -851,7 +853,7 @@ class MainWindow(QMainWindow):
             "<tr><td>Charisma</td><td>17</td></tr>"
             "</table>"
         )
-        self.status_bar.showMessage(f"✓ Blank Character '{name}' erstellt (ID: {blank_id})")
+        self.status_bar.showMessage(f"✓ Blank Character '{name}' created (ID: {blank_id})")
 
     # ══════════════════════════════════════════════════════════════════
     #  SDE IMPORT
@@ -860,20 +862,20 @@ class MainWindow(QMainWindow):
     def _on_import_sde(self) -> None:
         """Import SDE data."""
         from PySide6.QtWidgets import QFileDialog
-        sde_dir = QFileDialog.getExistingDirectory(self, "SDE JSONL Verzeichnis auswählen")
+        sde_dir = QFileDialog.getExistingDirectory(self, "Select SDE JSONL Directory")
         if not sde_dir:
             return
         try:
-            self.status_bar.showMessage("SDE-Import läuft...")
+            self.status_bar.showMessage("SDE import in progress...")
             from pymon.sde.loader import import_sde
             import_sde(sde_dir, self.config.sde_db_path)
             self.sde = SDEDatabase(self.config.sde_db_path)
             self.char_service.sde = self.sde
             self.name_resolver.sde = self.sde
             build = self.sde.get_build_number()
-            self.status_bar.showMessage(f"✓ SDE importiert (Build {build})")
+            self.status_bar.showMessage(f"✓ SDE imported (Build {build})")
         except Exception as e:
-            self.status_bar.showMessage(f"✗ SDE-Import Fehler: {e}")
+            self.status_bar.showMessage(f"✗ SDE import error: {e}")
 
     def _on_update_sde_online(self) -> None:
         """Download latest SDE from data.everef.net and import it."""
@@ -899,7 +901,7 @@ class MainWindow(QMainWindow):
             self.char_service.sde = self.sde
             self.name_resolver.sde = self.sde
             self.status_bar.showMessage(
-                f"✓ SDE online aktualisiert (Build {build})"
+                f"✓ SDE updated online (Build {build})"
             )
 
         thread.finished_ok.connect(_on_done)
@@ -937,7 +939,7 @@ class MainWindow(QMainWindow):
                 sync_folder=self.config.cloud_sync_path,
                 data_dir=str(self.config.data_dir),
             )
-            self.status_bar.showMessage("✓ Einstellungen gespeichert")
+            self.status_bar.showMessage("✓ Settings saved")
 
     # ══════════════════════════════════════════════════════════════════
     #  DATA FETCHING – MAIN DISPATCHER
@@ -950,29 +952,29 @@ class MainWindow(QMainWindow):
         logger.info("Starting data fetch for character %d", character_id)
 
         # Show loading state on all tabs
-        self.overview_label.setText("<p>Lade Charakterdaten...</p>")
-        self.skill_queue_label.setText("<p>Lade Skill Queue...</p>")
-        self.skills_label.setText("<p>Lade Skills...</p>")
-        self.mail_label.setText("<p>Lade Mail...</p>")
-        self.wallet_label.setText("<p>Lade Wallet...</p>")
-        self.assets_label.setText("<p>Lade Assets...</p>")
-        self.contracts_label.setText("<p>Lade Contracts...</p>")
-        self.industry_label.setText("<p>Lade Industrie-Jobs...</p>")
-        self.market_label.setText("<p>Lade Markt-Orders...</p>")
-        self.fittings_label.setText("<p>Lade Fittings...</p>")
-        self.blueprints_label.setText("<p>Lade Blueprints...</p>")
-        self.killmails_label.setText("<p>Lade Killmails...</p>")
-        self.pi_label.setText("<p>Lade PI-Kolonien...</p>")
-        self.contacts_label.setText("<p>Lade Kontakte...</p>")
-        self.notifications_label.setText("<p>Lade Benachrichtigungen...</p>")
-        self.calendar_label.setText("<p>Lade Kalender...</p>")
-        self.research_label.setText("<p>Lade Research...</p>")
-        self.medals_label.setText("<p>Lade Medaillen...</p>")
-        self.clones_label.setText("<p>Lade Klone...</p>")
-        self.bookmarks_label.setText("<p>Lade Lesezeichen-Status...</p>")
-        self.loyalty_label.setText("<p>Lade LP...</p>")
-        self.mining_label.setText("<p>Lade Mining...</p>")
-        self.fw_label.setText("<p>Lade FW Stats...</p>")
+        self.overview_label.setText("<p>Loading character data...</p>")
+        self.skill_queue_label.setText("<p>Loading Skill Queue...</p>")
+        self.skills_label.setText("<p>Loading Skills...</p>")
+        self.mail_label.setText("<p>Loading Mail...</p>")
+        self.wallet_label.setText("<p>Loading Wallet...</p>")
+        self.assets_label.setText("<p>Loading Assets...</p>")
+        self.contracts_label.setText("<p>Loading Contracts...</p>")
+        self.industry_label.setText("<p>Loading Industry Jobs...</p>")
+        self.market_label.setText("<p>Loading Market Orders...</p>")
+        self.fittings_label.setText("<p>Loading Fittings...</p>")
+        self.blueprints_label.setText("<p>Loading Blueprints...</p>")
+        self.killmails_label.setText("<p>Loading Killmails...</p>")
+        self.pi_label.setText("<p>Loading PI Colonies...</p>")
+        self.contacts_label.setText("<p>Loading Contacts...</p>")
+        self.notifications_label.setText("<p>Loading Notifications...</p>")
+        self.calendar_label.setText("<p>Loading Calendar...</p>")
+        self.research_label.setText("<p>Loading Research...</p>")
+        self.medals_label.setText("<p>Loading Medals...</p>")
+        self.clones_label.setText("<p>Loading Clones...</p>")
+        self.bookmarks_label.setText("<p>Loading Bookmarks...</p>")
+        self.loyalty_label.setText("<p>Loading LP...</p>")
+        self.mining_label.setText("<p>Loading Mining...</p>")
+        self.fw_label.setText("<p>Loading FW Stats...</p>")
 
         def _fetch() -> None:
             loop = asyncio.new_event_loop()
@@ -1119,7 +1121,7 @@ class MainWindow(QMainWindow):
         try:
             char = loop.run_until_complete(self.char_service.fetch_character_overview(cid))
             if not char:
-                self._update_overview.emit("<p style='color:red'>Fehler beim Laden</p>")
+                self._update_overview.emit("<p style='color:red'>Error loading data</p>")
                 return
 
             # Resolve corp/alliance names
@@ -1154,10 +1156,10 @@ class MainWindow(QMainWindow):
             <table cellspacing='6'>
               <tr><td><b>Corporation:</b></td><td>{corp_name}</td></tr>
               {'<tr><td><b>Alliance:</b></td><td>' + alliance_name + '</td></tr>' if alliance_name else ''}
-              <tr><td><b>Sicherheitsstatus:</b></td><td style='color:{sec_col}'>{sec:+.2f}</td></tr>
-              <tr><td><b>Geburtstag:</b></td><td>{char.birthday[:10]}</td></tr>
-              <tr><td><b>Standort:</b></td><td>{char.solar_system_name}</td></tr>
-              <tr><td><b>Schiff:</b></td><td>{char.ship_name}</td></tr>
+              <tr><td><b>Security Status:</b></td><td style='color:{sec_col}'>{sec:+.2f}</td></tr>
+              <tr><td><b>Birthday:</b></td><td>{char.birthday[:10]}</td></tr>
+              <tr><td><b>Location:</b></td><td>{char.solar_system_name}</td></tr>
+              <tr><td><b>Ship:</b></td><td>{char.ship_name}</td></tr>
               <tr><td><b>Wallet:</b></td><td style='color:{Colors.ACCENT}'>{_format_isk(char.wallet_balance)}</td></tr>
               <tr><td><b>Total SP:</b></td><td>{_format_sp(char.total_sp)}</td></tr>
               <tr><td><b>Unallocated SP:</b></td><td>{_format_sp(char.unallocated_sp)}</td></tr>
@@ -1165,7 +1167,7 @@ class MainWindow(QMainWindow):
 
             # Attributes section
             if attrs:
-                html += """<h3>Attribute</h3><table cellspacing='4'>
+                html += """<h3>Attributes</h3><table cellspacing='4'>
                   <tr><td>🧠 Intelligence:</td><td><b>{}</b></td>
                       <td>📚 Memory:</td><td><b>{}</b></td></tr>
                   <tr><td>👁️ Perception:</td><td><b>{}</b></td>
@@ -1178,7 +1180,7 @@ class MainWindow(QMainWindow):
                     attrs.get("charisma", 0),
                 )
                 if attrs.get("bonus_remaps", 0) > 0:
-                    html += f"<p>Bonus Remaps verfügbar: <b>{attrs['bonus_remaps']}</b></p>"
+                    html += f"<p>Bonus Remaps available: <b>{attrs['bonus_remaps']}</b></p>"
 
             # Jump Fatigue
             try:
@@ -1198,17 +1200,17 @@ class MainWindow(QMainWindow):
                         html += (
                             f"<h3>⚡ Jump Fatigue</h3>"
                             f"<table cellspacing='4'>"
-                            f"<tr><td>Fatigue-Timer:</td>"
+                            f"<tr><td>Fatigue Timer:</td>"
                             f"<td style='color:{fat_color}'><b>{fat_str}</b></td></tr>"
                         )
                         if last_jump:
-                            html += f"<tr><td>Letzter Jump:</td><td>{_ts(last_jump)}</td></tr>"
-                        html += f"<tr><td>Frei ab:</td><td>{_ts(expire)}</td></tr></table>"
+                            html += f"<tr><td>Last Jump:</td><td>{_ts(last_jump)}</td></tr>"
+                        html += f"<tr><td>Clears at:</td><td>{_ts(expire)}</td></tr></table>"
                     elif last_jump:
                         html += (
                             f"<h3>⚡ Jump Fatigue</h3>"
-                            f"<p style='color:{Colors.ACCENT}'>✓ Keine Fatigue aktiv</p>"
-                            f"<p style='color:{Colors.TEXT_DIM}'>Letzter Jump: {_ts(last_jump)}</p>"
+                            f"<p style='color:{Colors.ACCENT}'>✓ No fatigue active</p>"
+                            f"<p style='color:{Colors.TEXT_DIM}'>Last Jump: {_ts(last_jump)}</p>"
                         )
             except Exception:
                 pass  # Fatigue is optional
@@ -1216,7 +1218,7 @@ class MainWindow(QMainWindow):
             # Employment History
             if history:
                 html += "<h3>Employment History</h3><table>"
-                html += "<tr><th>Corporation</th><th>Beigetreten</th></tr>"
+                html += "<tr><th>Corporation</th><th>Joined</th></tr>"
                 for h in history[:20]:
                     corp_id = h.get("corporation_id", 0)
                     start = h.get("start_date", "")[:10]
@@ -1226,7 +1228,7 @@ class MainWindow(QMainWindow):
             self._update_overview.emit(html)
         except Exception as e:
             logger.error("Overview tab error", exc_info=True)
-            self._update_overview.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_overview.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  SKILL QUEUE TAB – with progress bars
@@ -1236,7 +1238,7 @@ class MainWindow(QMainWindow):
         try:
             queue = loop.run_until_complete(self.char_service.fetch_skill_queue(cid))
             if not queue:
-                self._update_skill_queue.emit("<p>Keine Skills in der Queue.</p>")
+                self._update_skill_queue.emit("<p>No skills in queue.</p>")
                 return
 
             # Check for completed skills (notification)
@@ -1266,10 +1268,10 @@ class MainWindow(QMainWindow):
 
             # Queue completion date
             last_finish = max((e.finish_date for e in queue if e.finish_date), default=None)
-            finish_str = f" | Fertig: {_ts(last_finish)}" if last_finish else ""
+            finish_str = f" | Finish: {_ts(last_finish)}" if last_finish else ""
 
             html = (
-                f"<h3>Skill Queue ({len(queue)} Skills, ~{total_str} verbleibend"
+                f"<h3>Skill Queue ({len(queue)} Skills, ~{total_str} remaining"
                 f" | {total_sp_remaining:,} SP{finish_str})</h3>"
             )
 
@@ -1289,7 +1291,7 @@ class MainWindow(QMainWindow):
                 )
 
             html += "<table cellspacing='2' style='width:100%'>"
-            html += "<tr><th>#</th><th>Skill</th><th>Level</th><th>Fortschritt</th><th>SP</th><th>SP/h</th><th>Restzeit</th></tr>"
+            html += "<tr><th>#</th><th>Skill</th><th>Level</th><th>Progress</th><th>SP</th><th>SP/h</th><th>Time Left</th></tr>"
 
             for idx, entry in enumerate(queue, 1):
                 level_roman = ["", "I", "II", "III", "IV", "V"][entry.finished_level]
@@ -1361,7 +1363,7 @@ class MainWindow(QMainWindow):
             self._update_skill_queue.emit(html)
         except Exception as e:
             logger.error("Skill queue tab error", exc_info=True)
-            self._update_skill_queue.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_skill_queue.emit(f"<p style='color:red'>Error: {e}</p>")
 
     def _update_title_with_training(self, entry) -> None:
         """Update window title with current training info (thread-safe)."""
@@ -1424,7 +1426,7 @@ class MainWindow(QMainWindow):
         if not new_queue and prev_ids and self.config.tray_notify_queue_empty:
             self._tray_icon.showMessage(
                 "PyMon – Skill Queue leer!",
-                "Die Skill Queue ist leer. Füge neue Skills hinzu!",
+                "The skill queue is empty. Add new skills!",
                 QSystemTrayIcon.MessageIcon.Warning, popup_ms,
             )
             # Email notification for empty queue
@@ -1440,13 +1442,13 @@ class MainWindow(QMainWindow):
         try:
             skills = loop.run_until_complete(self.char_service.fetch_skills(cid))
             if not skills:
-                self._update_skills.emit("<p>Keine Skills.</p>")
+                self._update_skills.emit("<p>No skills.</p>")
                 return
 
             # Group by group_name
             groups: dict[str, list] = {}
             for s in skills:
-                groups.setdefault(s.group_name or "Unbekannt", []).append(s)
+                groups.setdefault(s.group_name or "Unknown", []).append(s)
 
             level_bars = {0: "○○○○○", 1: "●○○○○", 2: "●●○○○", 3: "●●●○○", 4: "●●●●○", 5: "●●●●●"}
 
@@ -1487,7 +1489,7 @@ class MainWindow(QMainWindow):
             self._update_ship_browser.emit(trained)
         except Exception as e:
             logger.error("Skills tab error", exc_info=True)
-            self._update_skills.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_skills.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  MAIL TAB – with body preview
@@ -1505,7 +1507,7 @@ class MainWindow(QMainWindow):
                 sender_names = {}
 
             if not mail:
-                self._update_mail.emit("<p>Keine Mails.</p>")
+                self._update_mail.emit("<p>No mail.</p>")
                 return
 
             # Fetch body for first 10 mails
@@ -1520,7 +1522,7 @@ class MainWindow(QMainWindow):
                 except Exception:
                     pass
 
-            html = f"<h3>Posteingang ({len(mail)} Mails)</h3>"
+            html = f"<h3>Inbox ({len(mail)} Mails)</h3>"
 
             for m in mail:
                 ts = _ts(m.timestamp)
@@ -1532,7 +1534,7 @@ class MainWindow(QMainWindow):
                     f"<div style='margin:6px 0;padding:8px;background:{bg};"
                     f"border-radius:4px;border-left:3px solid {'{Colors.BORDER}' if m.is_read else '{Colors.BLUE}'}'>"
                     f"<b>{read_icon} {m.subject}</b><br>"
-                    f"<span style='color:{Colors.TEXT_DIM}'>Von: {from_name} | {ts}</span>"
+                    f"<span style='color:{Colors.TEXT_DIM}'>From: {from_name} | {ts}</span>"
                 )
 
                 # Show body if available
@@ -1552,7 +1554,7 @@ class MainWindow(QMainWindow):
             self._update_mail.emit(html)
         except Exception as e:
             logger.error("Mail tab error", exc_info=True)
-            self._update_mail.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_mail.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  WALLET TAB – Journal + Transactions
@@ -1594,8 +1596,8 @@ class MainWindow(QMainWindow):
                     f"<h3>💰 Wallet – {latest_balance:,.2f} ISK</h3>"
                     f"<table cellspacing='6'>"
                     f"<tr><td>📈 Einnahmen:</td><td style='color:{Colors.ACCENT}'>+{total_income:,.2f} ISK</td>"
-                    f"<td>📉 Ausgaben:</td><td style='color:{Colors.RED}'>{total_expense:,.2f} ISK</td>"
-                    f"<td>📊 Bilanz:</td><td style='color:{net_color}'>{net:+,.2f} ISK</td></tr>"
+                    f"<td>📉 Expenses:</td><td style='color:{Colors.RED}'>{total_expense:,.2f} ISK</td>"
+                    f"<td>📊 Net Balance:</td><td style='color:{net_color}'>{net:+,.2f} ISK</td></tr>"
                     f"</table>"
                 )
 
@@ -1610,7 +1612,7 @@ class MainWindow(QMainWindow):
                     rng = max_b - min_b if max_b > min_b else 1
 
                     html += "<div style='margin:8px 0;padding:8px;background:{Colors.BG_DARKEST};border-radius:6px'>"
-                    html += "<p style='margin:0 0 4px 0;color:{Colors.TEXT_DIM};font-size:0.85em'>ISK-Verlauf (Journal)</p>"
+                    html += "<p style='margin:0 0 4px 0;color:{Colors.TEXT_DIM};font-size:0.85em'>ISK History (Journal)</p>"
                     html += "<div style='display:flex;align-items:flex-end;height:60px;gap:1px'>"
                     for val in sampled:
                         pct = max(3, int(100 * (val - min_b) / rng))
@@ -1628,8 +1630,8 @@ class MainWindow(QMainWindow):
 
             # Journal
             if journal:
-                html += "<h3>Wallet Journal (letzte 50)</h3><table>"
-                html += "<tr><th>Datum</th><th>Typ</th><th>Von</th><th>An</th><th>Betrag</th><th>Saldo</th><th>Beschreibung</th></tr>"
+                html += "<h3>Wallet Journal (last 50)</h3><table>"
+                html += "<tr><th>Date</th><th>Type</th><th>From</th><th>To</th><th>Amount</th><th>Balance</th><th>Description</th></tr>"
                 for j in journal[:50]:
                     ts = _ts(j.date)
                     amt_color = "{Colors.ACCENT}" if j.amount and j.amount >= 0 else "{Colors.RED}"
@@ -1645,16 +1647,16 @@ class MainWindow(QMainWindow):
                     )
                 html += "</table>"
             else:
-                html += "<p>Kein Wallet Journal.</p>"
+                html += "<p>No wallet journal entries.</p>"
 
             # Transactions
             if transactions:
-                html += "<h3>Transaktionen</h3><table>"
-                html += "<tr><th>Datum</th><th>Gegenstand</th><th>Menge</th><th>Preis/Stk</th><th>Gesamt</th><th>Typ</th><th>Kunde</th><th>Standort</th></tr>"
+                html += "<h3>Transactions</h3><table>"
+                html += "<tr><th>Date</th><th>Item</th><th>Quantity</th><th>Price/Unit</th><th>Total</th><th>Type</th><th>Client</th><th>Location</th></tr>"
                 for t in transactions[:50]:
                     ts = _ts(t.date)
                     total = t.quantity * t.unit_price
-                    buy_sell = "🔴 Kauf" if t.is_buy else "🟢 Verkauf"
+                    buy_sell = "🔴 Buy" if t.is_buy else "🟢 Sell"
                     color = "{Colors.RED}" if t.is_buy else "{Colors.ACCENT}"
                     client_name = resolved.get(t.client_id, "") if t.client_id else ""
                     loc_name = resolved.get(t.location_id, "") if t.location_id else ""
@@ -1686,7 +1688,7 @@ class MainWindow(QMainWindow):
                 ]
                 self._update_trade_tracker.emit(tx_dicts)
         except Exception as e:
-            self._update_wallet.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_wallet.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  ASSETS TAB – with location names
@@ -1696,7 +1698,7 @@ class MainWindow(QMainWindow):
         try:
             assets = loop.run_until_complete(self.char_service.fetch_assets(cid))
             if not assets:
-                self._update_assets.emit("<p>Keine Assets.</p>")
+                self._update_assets.emit("<p>No assets found.</p>")
                 return
 
             # Resolve location IDs (stations, citadels, solar systems – but not items inside containers)
@@ -1727,7 +1729,7 @@ class MainWindow(QMainWindow):
                         total_value += val
                 location_values[loc_id] = loc_val
 
-            html = f"<h3>Assets ({len(assets)} Gegenstände | ~{total_value:,.0f} ISK Basiswert)</h3>"
+            html = f"<h3>Assets ({len(assets)} items | ~{total_value:,.0f} ISK base value)</h3>"
 
             # Sort locations by value (highest first)
             sorted_locs = sorted(by_location.keys(),
@@ -1741,7 +1743,7 @@ class MainWindow(QMainWindow):
                 val_str = f" | ~{loc_val:,.0f} ISK" if loc_val > 0 else ""
 
                 html += f"<h4>📦 {loc_name} ({len(items)} Items{val_str})</h4><table>"
-                html += "<tr><th>Gegenstand</th><th>Menge</th><th>Kategorie</th><th>~ISK</th></tr>"
+                html += "<tr><th>Item</th><th>Quantity</th><th>Kategorie</th><th>~ISK</th></tr>"
                 for a in items_sorted[:150]:
                     base = self.sde.get_type(a.type_id)
                     item_val = (base["base_price"] * a.quantity) if base and base.get("base_price") else 0
@@ -1766,7 +1768,7 @@ class MainWindow(QMainWindow):
                 logger.debug("Skill books update skipped", exc_info=True)
         except Exception as e:
             logger.error("Assets tab error", exc_info=True)
-            self._update_assets.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_assets.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  CONTRACTS TAB
@@ -1776,7 +1778,7 @@ class MainWindow(QMainWindow):
         try:
             contracts = loop.run_until_complete(self.char_service.fetch_contracts(cid))
             if not contracts:
-                self._update_contracts.emit("<p>Keine Contracts.</p>")
+                self._update_contracts.emit("<p>No contracts found.</p>")
                 return
 
             self._contracts_cache = contracts  # store for detail popup
@@ -1804,9 +1806,9 @@ class MainWindow(QMainWindow):
             }
 
             html = f"<h3>📋 Contracts ({len(contracts)})</h3>"
-            html += "<p style='color:{Colors.TEXT_DIM}'>Klicke auf einen Contract für Details.</p>"
+            html += "<p style='color:{Colors.TEXT_DIM}'>Click on a contract for details.</p>"
             html += "<table>"
-            html += "<tr><th>Typ</th><th>Status</th><th>Titel</th><th>Ersteller</th><th>Empfänger</th><th>Preis</th><th>Ablauf</th></tr>"
+            html += "<tr><th>Type</th><th>Status</th><th>Title</th><th>Issuer</th><th>Assignee</th><th>Price</th><th>Expires</th></tr>"
             for c in contracts:
                 exp = _ts(c.date_expired, "%Y-%m-%d") if c.date_expired else "-"
                 issuer = names.get(c.issuer_id, f"#{c.issuer_id}")
@@ -1830,7 +1832,7 @@ class MainWindow(QMainWindow):
             self._update_contracts.emit(html)
         except Exception as e:
             logger.error("Contracts tab error", exc_info=True)
-            self._update_contracts.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_contracts.emit(f"<p style='color:red'>Error: {e}</p>")
 
     def _on_contract_link(self, url: str) -> None:
         """Handle clicks on contract links – show detail popup."""
@@ -1898,7 +1900,7 @@ class MainWindow(QMainWindow):
         if contract.issuer_id:
             html += f"<tr><td><b>Ersteller</b></td><td>{_cn.get(contract.issuer_id, f'#{contract.issuer_id}')}</td></tr>"
         if contract.assignee_id:
-            html += f"<tr><td><b>Empfänger</b></td><td>{_cn.get(contract.assignee_id, f'#{contract.assignee_id}')}</td></tr>"
+            html += f"<tr><td><b>Assignee</b></td><td>{_cn.get(contract.assignee_id, f'#{contract.assignee_id}')}</td></tr>"
         if contract.acceptor_id:
             html += f"<tr><td><b>Angenommen von</b></td><td>{_cn.get(contract.acceptor_id, f'#{contract.acceptor_id}')}</td></tr>"
 
@@ -1907,7 +1909,7 @@ class MainWindow(QMainWindow):
         if contract.reward:
             html += f"<tr><td><b>Belohnung</b></td><td>{contract.reward:,.2f} ISK</td></tr>"
         if contract.collateral:
-            html += f"<tr><td><b>Sicherheit</b></td><td>{contract.collateral:,.2f} ISK</td></tr>"
+            html += f"<tr><td><b>Collateral</b></td><td>{contract.collateral:,.2f} ISK</td></tr>"
         if contract.buyout:
             html += f"<tr><td><b>Sofortkauf</b></td><td>{contract.buyout:,.2f} ISK</td></tr>"
         if contract.volume:
@@ -1915,16 +1917,16 @@ class MainWindow(QMainWindow):
 
         # Start/End locations for courier contracts
         if contract.start_location_id:
-            start_loc = _cn.get(contract.start_location_id, f"Standort #{contract.start_location_id}")
+            start_loc = _cn.get(contract.start_location_id, f"Location #{contract.start_location_id}")
             html += f"<tr><td><b>Startort</b></td><td>{start_loc}</td></tr>"
         if contract.end_location_id:
-            end_loc = _cn.get(contract.end_location_id, f"Standort #{contract.end_location_id}")
+            end_loc = _cn.get(contract.end_location_id, f"Location #{contract.end_location_id}")
             html += f"<tr><td><b>Zielort</b></td><td>{end_loc}</td></tr>"
 
         if contract.date_issued:
-            html += f"<tr><td><b>Erstellt</b></td><td>{contract.date_issued:%Y-%m-%d %H:%M}</td></tr>"
+            html += f"<tr><td><b>Created</b></td><td>{contract.date_issued:%Y-%m-%d %H:%M}</td></tr>"
         if contract.date_expired:
-            html += f"<tr><td><b>Ablauf</b></td><td>{contract.date_expired:%Y-%m-%d %H:%M}</td></tr>"
+            html += f"<tr><td><b>Expires</b></td><td>{contract.date_expired:%Y-%m-%d %H:%M}</td></tr>"
         if contract.date_accepted:
             html += f"<tr><td><b>Akzeptiert</b></td><td>{contract.date_accepted:%Y-%m-%d %H:%M}</td></tr>"
         if contract.date_completed:
@@ -1954,7 +1956,7 @@ class MainWindow(QMainWindow):
                     html += f"<tr><td>{name}</td><td style='text-align:right'>{qty:,}</td></tr>"
                 html += "</table>"
         else:
-            html += "<p style='color:{Colors.TEXT_DIM}'>Keine Items in diesem Contract.</p>"
+            html += "<p style='color:{Colors.TEXT_DIM}'>No items in this contract.</p>"
 
         label.setText(html)
 
@@ -1973,7 +1975,7 @@ class MainWindow(QMainWindow):
         try:
             jobs = loop.run_until_complete(self.char_service.fetch_industry_jobs(cid))
             if not jobs:
-                self._update_industry.emit("<p>Keine Industrie-Jobs.</p>")
+                self._update_industry.emit("<p>No industry jobs.</p>")
                 return
 
             # Resolve facility/station IDs for location names
@@ -1987,8 +1989,8 @@ class MainWindow(QMainWindow):
                 self.name_resolver.resolve_many(list(fac_ids))
             ) if fac_ids else {}
 
-            activity_names = {1: "🔨 Herstellung", 3: "⏱️ TE-Forschung", 4: "🧪 ME-Forschung",
-                              5: "📋 Kopieren", 8: "💡 Invention", 9: "⚗️ Reaktion",
+            activity_names = {1: "🔨 Manufacturing", 3: "⏱️ TE Research", 4: "🧪 ME Research",
+                              5: "📋 Copying", 8: "💡 Invention", 9: "⚗️ Reaction",
                               11: "🔄 Reverse Engineering"}
 
             now = datetime.now(UTC)
@@ -1999,8 +2001,8 @@ class MainWindow(QMainWindow):
             other = [j for j in jobs if j.status not in ("active", "ready")]
 
             html = (
-                f"<h3>Industrie-Jobs ({len(jobs)}: "
-                f"🟢 {len(active)} aktiv, ✅ {len(ready)} fertig"
+                f"<h3>Industry Jobs ({len(jobs)}: "
+                f"🟢 {len(active)} active, ✅ {len(ready)} ready"
                 f"{f', 📦 {len(other)} andere' if other else ''})</h3>"
             )
 
@@ -2010,8 +2012,8 @@ class MainWindow(QMainWindow):
 
             # Active jobs with progress bars and timers
             if active:
-                html += "<h4>🟢 Aktive Jobs</h4><table style='width:100%'>"
-                html += "<tr><th>Aktivität</th><th>Blueprint</th><th>Runs</th><th>Standort</th><th>Fortschritt</th><th>Restzeit</th></tr>"
+                html += "<h4>🟢 Active Jobs</h4><table style='width:100%'>"
+                html += "<tr><th>Activity</th><th>Blueprint</th><th>Runs</th><th>Location</th><th>Progress</th><th>Time Left</th></tr>"
                 for j in sorted(active, key=lambda x: x.end_date or now):
                     activity = activity_names.get(j.activity_id, f"#{j.activity_id}")
 
@@ -2060,8 +2062,8 @@ class MainWindow(QMainWindow):
 
             # Ready (completed but not delivered)
             if ready:
-                html += "<h4>✅ Fertige Jobs (zur Abholung bereit)</h4><table>"
-                html += "<tr><th>Aktivität</th><th>Blueprint</th><th>Runs</th><th>Standort</th><th>Fertig seit</th></tr>"
+                html += "<h4>✅ Completed Jobs (ready for delivery)</h4><table>"
+                html += "<tr><th>Activity</th><th>Blueprint</th><th>Runs</th><th>Location</th><th>Completed</th></tr>"
                 for j in ready:
                     activity = activity_names.get(j.activity_id, f"#{j.activity_id}")
                     end = _ts(j.end_date)
@@ -2074,8 +2076,8 @@ class MainWindow(QMainWindow):
 
             # Other statuses
             if other:
-                html += "<h4>📦 Sonstige Jobs</h4><table>"
-                html += "<tr><th>Aktivität</th><th>Blueprint</th><th>Status</th><th>Runs</th><th>Standort</th><th>Ende</th></tr>"
+                html += "<h4>📦 Other Jobs</h4><table>"
+                html += "<tr><th>Activity</th><th>Blueprint</th><th>Status</th><th>Runs</th><th>Location</th><th>End Date</th></tr>"
                 for j in other:
                     activity = activity_names.get(j.activity_id, f"#{j.activity_id}")
                     status_icon = {"delivered": "📬", "cancelled": "❌", "paused": "⏸️",
@@ -2103,7 +2105,7 @@ class MainWindow(QMainWindow):
                 self._update_trade_advisor_industry.emit(manufacturing_products)
         except Exception as e:
             logger.error("Industry tab error", exc_info=True)
-            self._update_industry.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_industry.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  MARKET ORDERS TAB
@@ -2133,7 +2135,7 @@ class MainWindow(QMainWindow):
             total_volume = sum(o.volume_remain for o in orders)
 
             html = (
-                f"<h3>📊 Markt-Orders ({len(orders)}: "
+                f"<h3>📊 Market Orders ({len(orders)}: "
                 f"🟢 {len(sell)} Sell, 🔴 {len(buy)} Buy)</h3>"
             )
 
@@ -2142,7 +2144,7 @@ class MainWindow(QMainWindow):
                     f"<table cellspacing='6'>"
                     f"<tr><td>💰 Sell-Wert:</td><td style='color:{Colors.ACCENT}'>{sell_value:,.2f} ISK</td>"
                     f"<td>🔒 Buy-Escrow:</td><td style='color:{Colors.ORANGE}'>{buy_escrow:,.2f} ISK</td>"
-                    f"<td>📦 Verbleibend:</td><td>{total_volume:,} Stk</td></tr>"
+                    f"<td>📦 Remaining:</td><td>{total_volume:,} units</td></tr>"
                     f"</table>"
                 )
 
@@ -2150,7 +2152,7 @@ class MainWindow(QMainWindow):
 
             if sell:
                 html += "<h4>🟢 Sell Orders</h4><table style='width:100%'>"
-                html += "<tr><th>Gegenstand</th><th>Preis</th><th>Menge</th><th>Fortschritt</th><th>Standort</th><th>Ablauf</th></tr>"
+                html += "<tr><th>Item</th><th>Price</th><th>Quantity</th><th>Progress</th><th>Location</th><th>Expires</th></tr>"
                 for o in sorted(sell, key=lambda x: x.price * x.volume_remain, reverse=True):
                     sell_loc = order_names.get(o.location_id, "") if o.location_id else ""
                     # Volume progress
@@ -2187,7 +2189,7 @@ class MainWindow(QMainWindow):
 
             if buy:
                 html += "<h4>🔴 Buy Orders</h4><table style='width:100%'>"
-                html += "<tr><th>Gegenstand</th><th>Preis</th><th>Menge</th><th>Fortschritt</th><th>Standort</th><th>Escrow</th><th>Ablauf</th></tr>"
+                html += "<tr><th>Item</th><th>Price</th><th>Quantity</th><th>Progress</th><th>Location</th><th>Escrow</th><th>Expires</th></tr>"
                 for o in sorted(buy, key=lambda x: x.escrow, reverse=True):
                     buy_loc = order_names.get(o.location_id, "") if o.location_id else ""
                     vol_pct = 0
@@ -2222,12 +2224,12 @@ class MainWindow(QMainWindow):
                 html += "</table>"
 
             if not orders:
-                html += "<p>Keine Markt-Orders.</p>"
+                html += "<p>No market orders.</p>"
 
             self._update_market.emit(html)
         except Exception as e:
             logger.error("Market tab error", exc_info=True)
-            self._update_market.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_market.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  FITTINGS TAB
@@ -2237,7 +2239,7 @@ class MainWindow(QMainWindow):
         try:
             fittings = loop.run_until_complete(self.char_service.fetch_fittings(cid))
             if not fittings:
-                self._update_fittings.emit("<p>Keine gespeicherten Fittings.</p>")
+                self._update_fittings.emit("<p>No saved fittings.</p>")
                 return
 
             # Slot categories for grouping
@@ -2261,7 +2263,7 @@ class MainWindow(QMainWindow):
                     return (7, "Fighter Bay")
                 return (8, "Andere")
 
-            html = f"<h3>Gespeicherte Fittings ({len(fittings)})</h3>"
+            html = f"<h3>Saved Fittings ({len(fittings)})</h3>"
 
             for fit in sorted(fittings, key=lambda x: x.name):
                 html += (
@@ -2311,7 +2313,7 @@ class MainWindow(QMainWindow):
             self._update_fittings.emit(html)
         except Exception as e:
             logger.error("Fittings tab error", exc_info=True)
-            self._update_fittings.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_fittings.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  BLUEPRINTS TAB
@@ -2321,7 +2323,7 @@ class MainWindow(QMainWindow):
         try:
             bps = loop.run_until_complete(self.char_service.fetch_blueprints(cid))
             if not bps:
-                self._update_blueprints.emit("<p>Keine Blueprints.</p>")
+                self._update_blueprints.emit("<p>No blueprints found.</p>")
                 return
 
             # Resolve location IDs
@@ -2358,20 +2360,20 @@ class MainWindow(QMainWindow):
             # BPOs first
             if bpos:
                 html += "<h4>📗 Blueprint Originals</h4><table>"
-                html += "<tr><th>Name</th><th>ME</th><th>TE</th><th>Standort</th><th>Status</th></tr>"
+                html += "<tr><th>Name</th><th>ME</th><th>TE</th><th>Location</th><th>Status</th></tr>"
                 for b in sorted(bpos, key=lambda x: x.type_name)[:200]:
                     me_bar = _me_te_bar(b.material_efficiency, 10, "#1f6feb")
                     te_bar = _me_te_bar(b.time_efficiency, 20, "#8957e5")
                     bp_loc = bp_loc_names.get(b.location_id, "") if b.location_id else ""
                     status = ""
                     if b.material_efficiency >= 10 and b.time_efficiency >= 20:
-                        status = "✅ Perfekt"
+                        status = "✅ Perfect"
                     elif b.material_efficiency >= 10:
                         status = "🔵 ME max"
                     elif b.time_efficiency >= 20:
                         status = "🟣 TE max"
                     else:
-                        status = "🔬 Forschbar"
+                        status = "🔬 Researchable"
                     html += (
                         f"<tr><td>📗 {b.type_name}</td>"
                         f"<td>{me_bar}</td><td>{te_bar}</td>"
@@ -2384,7 +2386,7 @@ class MainWindow(QMainWindow):
             # BPCs
             if bpcs:
                 html += "<h4>📋 Blueprint Copies</h4><table>"
-                html += "<tr><th>Name</th><th>ME</th><th>TE</th><th>Standort</th><th>Runs</th></tr>"
+                html += "<tr><th>Name</th><th>ME</th><th>TE</th><th>Location</th><th>Runs</th></tr>"
                 for b in sorted(bpcs, key=lambda x: x.type_name)[:200]:
                     me_bar = _me_te_bar(b.material_efficiency, 10, "#1f6feb")
                     te_bar = _me_te_bar(b.time_efficiency, 20, "#8957e5")
@@ -2401,7 +2403,7 @@ class MainWindow(QMainWindow):
             self._update_blueprints.emit(html)
         except Exception as e:
             logger.error("Blueprints tab error", exc_info=True)
-            self._update_blueprints.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_blueprints.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  KILLMAILS TAB – with full details
@@ -2411,7 +2413,7 @@ class MainWindow(QMainWindow):
         try:
             kms = loop.run_until_complete(self.char_service.fetch_killmail_summaries(cid))
             if not kms:
-                self._update_killmails.emit("<p>Keine Killmails.</p>")
+                self._update_killmails.emit("<p>No killmails.</p>")
                 return
 
             html = f"<h3>Killmails ({len(kms)})</h3>"
@@ -2422,7 +2424,7 @@ class MainWindow(QMainWindow):
                     self.char_service.fetch_killmail_detail(km.killmail_id, km.killmail_hash)
                 )
                 if not detail:
-                    html += f"<p>Killmail #{km.killmail_id}: Fehler beim Laden</p>"
+                    html += f"<p>Killmail #{km.killmail_id}: Error loading data</p>"
                     continue
 
                 is_loss = detail.victim and detail.victim.character_id == cid
@@ -2462,7 +2464,7 @@ class MainWindow(QMainWindow):
 
                 # All attackers (sorted by damage)
                 html += f"<details><summary style='cursor:pointer;color:{Colors.BLUE}'>⚔️ Angreifer ({len(detail.attackers)})</summary>"
-                html += "<table><tr><th>Pilot</th><th>Corp</th><th>Schiff</th><th>Waffe</th><th>Schaden</th><th></th></tr>"
+                html += "<table><tr><th>Pilot</th><th>Corp</th><th>Ship</th><th>Weapon</th><th>Damage</th><th></th></tr>"
                 for a in sorted(detail.attackers, key=lambda x: x.damage_done, reverse=True):
                     a_name = km_names.get(a.character_id, "NPC") if a.character_id else "NPC"
                     a_corp = km_names.get(a.corporation_id, "") if a.corporation_id else ""
@@ -2482,7 +2484,7 @@ class MainWindow(QMainWindow):
                     if dropped or destroyed:
                         html += "<details><summary style='cursor:pointer;color:{Colors.BLUE}'>📦 Items</summary>"
                         if destroyed:
-                            html += "<p><b style='color:{Colors.RED}'>Zerstört:</b></p><ul>"
+                            html += "<p><b style='color:{Colors.RED}'>Destroyed:</b></p><ul>"
                             for item in sorted(destroyed, key=lambda x: x.slot_name):
                                 html += f"<li>[{item.slot_name}] {item.type_name} ×{item.quantity_destroyed}</li>"
                             html += "</ul>"
@@ -2501,7 +2503,7 @@ class MainWindow(QMainWindow):
             self._update_killmails.emit(html)
         except Exception as e:
             logger.error("Killmails tab error", exc_info=True)
-            self._update_killmails.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_killmails.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  PI TAB – with planet names
@@ -2511,7 +2513,7 @@ class MainWindow(QMainWindow):
         try:
             colonies = loop.run_until_complete(self.char_service.fetch_planetary_colonies(cid))
             if not colonies:
-                self._update_pi.emit("<p>Keine PI-Kolonien.</p>")
+                self._update_pi.emit("<p>No PI colonies.</p>")
                 return
 
             now = datetime.now(UTC)
@@ -2536,7 +2538,7 @@ class MainWindow(QMainWindow):
                     delta = (now - c.last_update).total_seconds()
                     hours_ago = int(delta // 3600)
                     if hours_ago > 72:
-                        update_info = f"<span style='color:{Colors.RED}'>⚠️ {hours_ago // 24}d ohne Update!</span>"
+                        update_info = f"<span style='color:{Colors.RED}'>⚠️ {hours_ago // 24}d without update!</span>"
                     elif hours_ago > 24:
                         update_info = f"<span style='color:{Colors.ORANGE}'>⏰ {hours_ago // 24}d {hours_ago % 24}h</span>"
                     else:
@@ -2553,7 +2555,7 @@ class MainWindow(QMainWindow):
                     f"<table cellspacing='4'>"
                     f"<tr><td>CC Level:</td><td><span style='color:{Colors.ORANGE}'>{level_bar}</span> ({c.upgrade_level})</td>"
                     f"<td>Pins:</td><td>{c.num_pins}</td></tr>"
-                    f"<tr><td>Letztes Update:</td><td>{lu}</td>"
+                    f"<tr><td>Last Update:</td><td>{lu}</td>"
                     f"<td>Status:</td><td>{update_info}</td></tr>"
                     f"</table></div>"
                 )
@@ -2561,7 +2563,7 @@ class MainWindow(QMainWindow):
             self._update_pi.emit(html)
         except Exception as e:
             logger.error("PI tab error", exc_info=True)
-            self._update_pi.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_pi.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  CONTACTS & STANDINGS TAB – grouped by type with names
@@ -2582,19 +2584,19 @@ class MainWindow(QMainWindow):
             def _standing_style(standing: float) -> tuple[str, str, str]:
                 """Return (color, icon, label) for EVE standing value."""
                 if standing >= 10.0:
-                    return "#1f69ff", "💙", "Exzellent"
+                    return "#1f69ff", "💙", "Excellent"
                 elif standing >= 5.0:
-                    return "#4a9eff", "🔵", "Gut"
+                    return "#4a9eff", "🔵", "Good"
                 elif standing > 0.0:
-                    return "#7ab8ff", "🔹", "Positiv"
+                    return "#7ab8ff", "🔹", "Positive"
                 elif standing == 0.0:
                     return "{Colors.TEXT_DIM}", "⬜", "Neutral"
                 elif standing > -5.0:
-                    return "{Colors.ORANGE}", "🔸", "Negativ"
+                    return "{Colors.ORANGE}", "🔸", "Negative"
                 elif standing > -10.0:
-                    return "{Colors.RED}", "🔴", "Schlecht"
+                    return "{Colors.RED}", "🔴", "Bad"
                 else:
-                    return "#c0392b", "💔", "Feindlich"
+                    return "#c0392b", "💔", "Terrible"
 
             def _standing_bar(standing: float) -> str:
                 """HTML standing bar from -10 to +10."""
@@ -2618,7 +2620,7 @@ class MainWindow(QMainWindow):
                     by_type.setdefault(c.contact_type, []).append(c)
 
                 type_icons = {"character": "👤", "corporation": "🏢", "alliance": "⚔️", "faction": "🏛️"}
-                html += f"<h3>Kontakte ({len(contacts)})</h3>"
+                html += f"<h3>Contacts ({len(contacts)})</h3>"
                 for ct in sorted(by_type):
                     ct_contacts = sorted(by_type[ct], key=lambda x: x.standing, reverse=True)
                     icon = type_icons.get(ct, "📇")
@@ -2664,12 +2666,12 @@ class MainWindow(QMainWindow):
                     html += "</table>"
 
             if not contacts and not standings:
-                html = "<p>Keine Kontakte oder Standings.</p>"
+                html = "<p>No contacts or standings.</p>"
 
             self._update_contacts.emit(html)
         except Exception as e:
             logger.error("Contacts tab error", exc_info=True)
-            self._update_contacts.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_contacts.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  NOTIFICATIONS TAB – with sender names
@@ -2679,7 +2681,7 @@ class MainWindow(QMainWindow):
         try:
             notifs = loop.run_until_complete(self.char_service.fetch_notifications(cid))
             if not notifs:
-                self._update_notifications.emit("<p>Keine Benachrichtigungen.</p>")
+                self._update_notifications.emit("<p>No notifications.</p>")
                 return
 
             # Resolve sender IDs
@@ -2695,7 +2697,7 @@ class MainWindow(QMainWindow):
                 cat = get_notification_category(n.type)
                 by_category.setdefault(cat, []).append(n)
 
-            html = f"<h3>Benachrichtigungen ({len(notifs)})</h3>"
+            html = f"<h3>Notifications ({len(notifs)})</h3>"
 
             # Show ungrouped (chronological) with parsed type names
             for cat_name in sorted(by_category.keys()):
@@ -2728,7 +2730,7 @@ class MainWindow(QMainWindow):
             self._update_notifications.emit(html)
         except Exception as e:
             logger.error("Notifications tab error", exc_info=True)
-            self._update_notifications.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_notifications.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  CALENDAR TAB
@@ -2738,11 +2740,11 @@ class MainWindow(QMainWindow):
         try:
             events = loop.run_until_complete(self.char_service.fetch_calendar_events(cid))
             if not events:
-                self._update_calendar.emit("<p>Keine anstehenden Events.</p>")
+                self._update_calendar.emit("<p>No upcoming events.</p>")
                 return
 
-            html = f"<h3>Kalender ({len(events)} Events)</h3><table>"
-            html += "<tr><th>Datum</th><th>Titel</th><th>Antwort</th></tr>"
+            html = f"<h3>Calendar ({len(events)} Events)</h3><table>"
+            html += "<tr><th>Date</th><th>Title</th><th>Antwort</th></tr>"
             for ev in events:
                 ts = _ts(ev.event_date)
                 response_icon = {"accepted": "✓", "declined": "✗", "tentative": "?", "not_responded": "–"}.get(
@@ -2754,7 +2756,7 @@ class MainWindow(QMainWindow):
             self._update_calendar.emit(html)
         except Exception as e:
             logger.error("Calendar tab error", exc_info=True)
-            self._update_calendar.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_calendar.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  RESEARCH TAB
@@ -2764,7 +2766,7 @@ class MainWindow(QMainWindow):
         try:
             agents = loop.run_until_complete(self.char_service.fetch_research_agents(cid))
             if not agents:
-                self._update_research.emit("<p>Keine Research Agents.</p>")
+                self._update_research.emit("<p>No research agents.</p>")
                 return
 
             # Resolve agent names
@@ -2772,7 +2774,7 @@ class MainWindow(QMainWindow):
             agent_names = loop.run_until_complete(self.name_resolver.resolve_many(agent_ids)) if agent_ids else {}
 
             html = f"<h3>Research Agents ({len(agents)})</h3><table>"
-            html += "<tr><th>Agent</th><th>Skill</th><th>RP/Tag</th><th>RP Gesamt</th><th>Seit</th></tr>"
+            html += "<tr><th>Agent</th><th>Skill</th><th>RP/Day</th><th>RP Total</th><th>Since</th></tr>"
             for a in agents:
                 aname = agent_names.get(a.agent_id, f"Agent #{a.agent_id}")
                 since = _ts(a.started_at, "%Y-%m-%d")
@@ -2790,7 +2792,7 @@ class MainWindow(QMainWindow):
             self._update_research.emit(html)
         except Exception as e:
             logger.error("Research tab error", exc_info=True)
-            self._update_research.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_research.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  MEDALS TAB
@@ -2800,14 +2802,14 @@ class MainWindow(QMainWindow):
         try:
             medals = loop.run_until_complete(self.char_service.fetch_medals(cid))
             if not medals:
-                self._update_medals.emit("<p>Keine Medaillen.</p>")
+                self._update_medals.emit("<p>No medals.</p>")
                 return
 
             # Resolve corporation IDs
             corp_ids = list(set(m.corporation_id for m in medals if m.corporation_id))
             corp_names = loop.run_until_complete(self.name_resolver.resolve_many(corp_ids)) if corp_ids else {}
 
-            html = f"<h3>Medaillen ({len(medals)})</h3>"
+            html = f"<h3>Medals ({len(medals)})</h3>"
             for m in medals:
                 dt = _ts(m.date, "%Y-%m-%d")
                 corp_name = corp_names.get(m.corporation_id, f"Corp #{m.corporation_id}")
@@ -2825,7 +2827,7 @@ class MainWindow(QMainWindow):
             self._update_medals.emit(html)
         except Exception as e:
             logger.error("Medals tab error", exc_info=True)
-            self._update_medals.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_medals.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  CLONES & IMPLANTS TAB
@@ -2854,11 +2856,11 @@ class MainWindow(QMainWindow):
             except Exception:
                 logger.debug("Could not update implant calculator", exc_info=True)
 
-            html = "<h3>🧬 Klone &amp; Implantate</h3>"
+            html = "<h3>🧬 Clones &amp; Implants</h3>"
 
             # Active implants
             if implant_names:
-                html += "<h4>💉 Aktive Implantate</h4><table>"
+                html += "<h4>💉 Active Implants</h4><table>"
                 html += "<tr><th>#</th><th>Implantat</th></tr>"
 
                 # Group by slot (implant names often contain slot info)
@@ -2879,7 +2881,7 @@ class MainWindow(QMainWindow):
                     )
                 html += "</table>"
             else:
-                html += "<p style='color:{Colors.TEXT_DIM}'>Keine aktiven Implantate.</p>"
+                html += "<p style='color:{Colors.TEXT_DIM}'>No active implants.</p>"
 
             # Jump Clones
             if clones:
@@ -2913,16 +2915,16 @@ class MainWindow(QMainWindow):
                             html += f"<li style='color:{Colors.TEXT_HEADING}'>{iname}</li>"
                         html += "</ul>"
                     else:
-                        html += "<p style='color:{Colors.TEXT_DIM};margin:2px 0'>Keine Implantate</p>"
+                        html += "<p style='color:{Colors.TEXT_DIM};margin:2px 0'>No implants</p>"
 
                     html += "</div>"
             else:
-                html += "<p style='color:{Colors.TEXT_DIM}'>Keine Jump Clones.</p>"
+                html += "<p style='color:{Colors.TEXT_DIM}'>No jump clones.</p>"
 
             self._update_clones.emit(html)
         except Exception as e:
             logger.error("Clones tab error", exc_info=True)
-            self._update_clones.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_clones.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  BOOKMARKS TAB
@@ -2941,25 +2943,25 @@ class MainWindow(QMainWindow):
                 (cid,),
             ).fetchall()
 
-            html = "<h3>🔖 Lesezeichen</h3>"
+            html = "<h3>🔖 Bookmarks</h3>"
             html += (
                 "<div style='background:#3d2b1f; border:1px solid #b8860b; "
                 "border-radius:6px; padding:12px; margin:8px 0;'>"
-                "<p style='color:#ffd700; font-weight:bold;'>⚠️ API entfernt</p>"
-                "<p style='color:#deb887;'>CCP hat die Bookmarks-ESI-Endpoints "
-                "entfernt. Neue Lesezeichen können nicht mehr über die API "
-                "abgerufen werden.</p>"
-                "<p style='color:{Colors.TEXT_DIM}; font-size:0.9em;'>Die Scopes "
-                "<code>esi-bookmarks.read_character_bookmarks.v1</code> und "
+                "<p style='color:#ffd700; font-weight:bold;'>⚠️ API removed</p>"
+                "<p style='color:#deb887;'>CCP has removed the Bookmarks ESI endpoints "
+                "in 2024. New bookmarks cannot be fetched via the API "
+                "anymore.</p>"
+                "<p style='color:{Colors.TEXT_DIM}; font-size:0.9em;'>The scopes "
+                "<code>esi-bookmarks.read_character_bookmarks.v1</code> and "
                 "<code>esi-bookmarks.read_corporation_bookmarks.v1</code> "
-                "existieren nicht mehr im ESI.</p>"
+                "no longer exist in ESI.</p>"
                 "</div>"
             )
 
             if cached:
-                html += f"<h4>📋 Gespeicherte Lesezeichen ({len(cached)})</h4>"
-                html += "<p style='color:{Colors.TEXT_DIM}'>Zuletzt gecachte Daten:</p>"
-                html += "<table><tr><th>Label</th><th>Notizen</th><th>Erstellt</th></tr>"
+                html += f"<h4>📋 Cached Bookmarks ({len(cached)})</h4>"
+                html += "<p style='color:{Colors.TEXT_DIM}'>Last cached data:</p>"
+                html += "<table><tr><th>Label</th><th>Notes</th><th>Created</th></tr>"
                 for bm in cached:
                     label = bm["label"] or "-"
                     notes = bm["notes"] or "-"
@@ -2973,12 +2975,12 @@ class MainWindow(QMainWindow):
                     )
                 html += "</table>"
             else:
-                html += "<p style='color:{Colors.TEXT_DIM}'>Keine gespeicherten Lesezeichen im Cache.</p>"
+                html += "<p style='color:{Colors.TEXT_DIM}'>No cached bookmarks available.</p>"
 
             self._update_bookmarks.emit(html)
         except Exception as e:
             logger.error("Bookmarks tab error", exc_info=True)
-            self._update_bookmarks.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_bookmarks.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  LOYALTY POINTS TAB
@@ -2988,7 +2990,7 @@ class MainWindow(QMainWindow):
         try:
             lp_entries = loop.run_until_complete(self.char_service.fetch_loyalty_points(cid))
             if not lp_entries:
-                self._update_loyalty.emit("<p>Keine Loyalty Points.</p>")
+                self._update_loyalty.emit("<p>No loyalty points.</p>")
                 return
 
             # Resolve corporation names
@@ -2999,7 +3001,7 @@ class MainWindow(QMainWindow):
 
             total_lp = sum(lp.loyalty_points for lp in lp_entries)
 
-            html = f"<h3>🏆 Loyalty Points ({total_lp:,} LP gesamt)</h3>"
+            html = f"<h3>🏆 Loyalty Points ({total_lp:,} LP total)</h3>"
 
             # Sort by LP amount, highest first
             sorted_lp = sorted(lp_entries, key=lambda x: x.loyalty_points, reverse=True)
@@ -3008,7 +3010,7 @@ class MainWindow(QMainWindow):
             max_lp = max(lp.loyalty_points for lp in sorted_lp) if sorted_lp else 1
 
             html += "<table style='width:100%'>"
-            html += "<tr><th>Corporation</th><th>LP</th><th>Anteil</th></tr>"
+            html += "<tr><th>Corporation</th><th>LP</th><th>Share</th></tr>"
 
             for lp in sorted_lp:
                 name = corp_names.get(lp.corporation_id, f"Corp #{lp.corporation_id}")
@@ -3044,7 +3046,7 @@ class MainWindow(QMainWindow):
             self._update_loyalty.emit(html)
         except Exception as e:
             logger.error("Loyalty tab error", exc_info=True)
-            self._update_loyalty.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_loyalty.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  MINING LEDGER TAB
@@ -3054,7 +3056,7 @@ class MainWindow(QMainWindow):
         try:
             entries = loop.run_until_complete(self.char_service.fetch_mining_ledger(cid))
             if not entries:
-                self._update_mining.emit("<p>Kein Mining-Ledger (letzte 30 Tage).</p>")
+                self._update_mining.emit("<p>No mining ledger (last 30 days).</p>")
                 return
 
             # Aggregate by ore type
@@ -3083,12 +3085,12 @@ class MainWindow(QMainWindow):
                     total_value += val
 
             html = (
-                f"<h3>⛏️ Mining Ledger ({len(entries)} Einträge, "
-                f"letzte 30 Tage)</h3>"
+                f"<h3>⛏️ Mining Ledger ({len(entries)} entries, "
+                f"last 30 days)</h3>"
                 f"<table cellspacing='6'>"
-                f"<tr><td>📦 Gesamt-Volumen:</td><td><b>{total_volume:,}</b> Einheiten</td>"
-                f"<td>💰 ~Basiswert:</td><td style='color:{Colors.ACCENT}'><b>{total_value:,.0f} ISK</b></td>"
-                f"<td>📅 Aktive Tage:</td><td><b>{len(by_date)}</b></td></tr>"
+                f"<tr><td>📦 Total Volume:</td><td><b>{total_volume:,}</b> units</td>"
+                f"<td>💰 ~base value:</td><td style='color:{Colors.ACCENT}'><b>{total_value:,.0f} ISK</b></td>"
+                f"<td>📅 Active Days:</td><td><b>{len(by_date)}</b></td></tr>"
                 f"</table>"
             )
 
@@ -3096,7 +3098,7 @@ class MainWindow(QMainWindow):
             if by_date:
                 sorted_dates = sorted(by_date.keys())
                 html += "<div style='margin:8px 0;padding:8px;background:{Colors.BG_DARKEST};border-radius:6px'>"
-                html += "<p style='margin:0 0 4px 0;color:{Colors.TEXT_DIM};font-size:0.85em'>Tägliches Mining-Volumen</p>"
+                html += "<p style='margin:0 0 4px 0;color:{Colors.TEXT_DIM};font-size:0.85em'>Daily Mining Volume</p>"
                 html += "<div style='display:flex;align-items:flex-end;height:50px;gap:2px'>"
                 max_daily = max(by_date.values())
                 for d in sorted_dates:
@@ -3113,8 +3115,8 @@ class MainWindow(QMainWindow):
                 html += "</div>"
 
             # By ore type (sorted by quantity)
-            html += "<h4>🪨 Nach Erz-Typ</h4><table style='width:100%'>"
-            html += "<tr><th>Erz</th><th>Menge</th><th>~ISK</th><th></th></tr>"
+            html += "<h4>🪨 By Ore Type</h4><table style='width:100%'>"
+            html += "<tr><th>Erz</th><th>Quantity</th><th>~ISK</th><th></th></tr>"
             max_qty = max(by_type.values()) if by_type else 1
             for type_name in sorted(by_type, key=by_type.get, reverse=True):
                 qty = by_type[type_name]
@@ -3136,8 +3138,8 @@ class MainWindow(QMainWindow):
             html += "</table>"
 
             # By system
-            html += "<h4>🌐 Nach System</h4><table>"
-            html += "<tr><th>System</th><th>Menge</th></tr>"
+            html += "<h4>🌐 By System</h4><table>"
+            html += "<tr><th>System</th><th>Quantity</th></tr>"
             for sys_name in sorted(by_system, key=by_system.get, reverse=True):
                 html += f"<tr><td>📍 {sys_name}</td><td style='text-align:right'>{by_system[sys_name]:,}</td></tr>"
             html += "</table>"
@@ -3156,7 +3158,7 @@ class MainWindow(QMainWindow):
             self._update_trade_advisor_mining.emit(mining_dicts)
         except Exception as e:
             logger.error("Mining tab error", exc_info=True)
-            self._update_mining.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_mining.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  FACTIONAL WARFARE TAB
@@ -3166,7 +3168,7 @@ class MainWindow(QMainWindow):
         try:
             stats = loop.run_until_complete(self.char_service.fetch_fw_stats(cid))
             if not stats:
-                self._update_fw.emit("<p>Nicht in Factional Warfare aktiv.</p>")
+                self._update_fw.emit("<p>Not active in Factional Warfare.</p>")
                 return
 
             # Resolve faction name
@@ -3194,8 +3196,8 @@ class MainWindow(QMainWindow):
                 f"<div style='margin:8px 0;padding:12px;background:{Colors.BG_DARK};"
                 f"border-radius:6px;border-left:4px solid {color}'>"
                 f"<table cellspacing='6'>"
-                f"<tr><td>Fraktion:</td><td style='color:{color}'><b>{faction_name}</b></td></tr>"
-                f"<tr><td>Beigetreten:</td><td>{enlisted_date}</td></tr>"
+                f"<tr><td>Faction:</td><td style='color:{color}'><b>{faction_name}</b></td></tr>"
+                f"<tr><td>Joined:</td><td>{enlisted_date}</td></tr>"
             )
 
             # Current rank
@@ -3203,8 +3205,8 @@ class MainWindow(QMainWindow):
             highest_rank = stats.get("highest_rank", 0)
             if current_rank or highest_rank:
                 html += (
-                    f"<tr><td>Aktueller Rang:</td><td><b>{current_rank}</b></td></tr>"
-                    f"<tr><td>Höchster Rang:</td><td>{highest_rank}</td></tr>"
+                    f"<tr><td>Current Rank:</td><td><b>{current_rank}</b></td></tr>"
+                    f"<tr><td>Highest Rank:</td><td>{highest_rank}</td></tr>"
                 )
 
             html += "</table></div>"
@@ -3222,14 +3224,14 @@ class MainWindow(QMainWindow):
 
                 html += (
                     "<h4>⚔️ Kills &amp; Victory Points</h4><table>"
-                    "<tr><th>Zeitraum</th><th>Kills</th><th>Victory Points</th></tr>"
-                    f"<tr><td>Gestern</td>"
+                    "<tr><th>Period</th><th>Kills</th><th>Victory Points</th></tr>"
+                    f"<tr><td>Yesterday</td>"
                     f"<td style='color:{Colors.ACCENT}'>{k_yesterday:,}</td>"
                     f"<td>{vp_yesterday:,}</td></tr>"
-                    f"<tr><td>Letzte Woche</td>"
+                    f"<tr><td>Last Week</td>"
                     f"<td style='color:{Colors.ACCENT}'>{k_last:,}</td>"
                     f"<td>{vp_last:,}</td></tr>"
-                    f"<tr><td><b>Gesamt</b></td>"
+                    f"<tr><td><b>Total</b></td>"
                     f"<td style='color:{Colors.ACCENT}'><b>{k_total:,}</b></td>"
                     f"<td><b>{vp_total:,}</b></td></tr>"
                     "</table>"
@@ -3238,7 +3240,7 @@ class MainWindow(QMainWindow):
             self._update_fw.emit(html)
         except Exception as e:
             logger.error("FW tab error", exc_info=True)
-            self._update_fw.emit(f"<p style='color:red'>Fehler: {e}</p>")
+            self._update_fw.emit(f"<p style='color:red'>Error: {e}</p>")
 
     # ══════════════════════════════════════════════════════════════════
     #  CHARACTER PORTRAIT
@@ -3273,6 +3275,8 @@ class MainWindow(QMainWindow):
 
     def _update_server_status(self) -> None:
         """Fetch and display server status."""
+        if self._shutting_down:
+            return
         import threading
 
         def _fetch_status() -> None:
@@ -3283,10 +3287,10 @@ class MainWindow(QMainWindow):
                 players = status.get("players", 0)
                 version = status.get("server_version", "?")
                 self._update_server_status_text.emit(
-                    f"🟢 Tranquility: {players:,} Spieler online | v{version}"
+                    f"🟢 Tranquility: {players:,} players online | v{version}"
                 )
             except Exception:
-                self._update_server_status_text.emit("🔴 Server nicht erreichbar")
+                self._update_server_status_text.emit("🔴 Server unreachable")
 
         thread = threading.Thread(target=_fetch_status, daemon=True)
         thread.start()
@@ -3297,6 +3301,8 @@ class MainWindow(QMainWindow):
 
     def refresh_data(self) -> None:
         """Periodic data refresh."""
+        if self._shutting_down:
+            return
         self._update_server_status()
         item = self.char_list.currentItem()
         if item:
@@ -3328,12 +3334,12 @@ class MainWindow(QMainWindow):
         if isinstance(widget, _SA) and widget.widget() and isinstance(widget.widget(), QLabel):
             label = widget.widget()
         if not label:
-            QMessageBox.information(self, "Export", "Dieser Tab kann nicht exportiert werden.")
+            QMessageBox.information(self, "Export", "Dieser Tab kann nicht  werden.")
             return
 
         html = label.text()
         if not html or "<table" not in html.lower():
-            QMessageBox.information(self, "Export", "Keine Tabellendaten zum Exportieren.")
+            QMessageBox.information(self, "Export", "No table data to export.")
             return
 
         # Parse HTML tables into rows
@@ -3351,7 +3357,7 @@ class MainWindow(QMainWindow):
                     rows.append(clean_cells)
 
         if not rows:
-            QMessageBox.information(self, "Export", "Keine Tabellendaten gefunden.")
+            QMessageBox.information(self, "Export", "No table data found.")
             return
 
         # Ask user for filename
@@ -3367,9 +3373,9 @@ class MainWindow(QMainWindow):
                 writer = csv.writer(f, delimiter=";")
                 for row in rows:
                     writer.writerow(row)
-            self.status_bar.showMessage(f"✓ {len(rows)} Zeilen nach {path} exportiert", 5000)
+            self.status_bar.showMessage(f"✓ {len(rows)} rows exported to {path} ", 5000)
         except Exception as e:
-            QMessageBox.critical(self, "Export-Fehler", str(e))
+            QMessageBox.critical(self, "Export Error", str(e))
 
     # ══════════════════════════════════════════════════════════════════
     #  ICS EXPORT / CLOUD SYNC / AUTO-UPDATE
@@ -3380,12 +3386,12 @@ class MainWindow(QMainWindow):
         item = self.char_list.currentItem()
         if item:
             return item.text()
-        return "Unbekannt"
+        return "Unknown"
 
     def _on_export_ics(self) -> None:
         """Export the current skill queue as ICS calendar file."""
         if not self._current_character_id:
-            QMessageBox.information(self, "ICS Export", "Kein Charakter ausgewählt.")
+            QMessageBox.information(self, "ICS Export", "No character selected.")
             return
 
         char_name = self._get_current_char_name()
@@ -3441,7 +3447,7 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self, "Cloud Sync",
                 "Cloud-Ordner nicht konfiguriert.\n"
-                "Bitte unter Einstellungen → Cloud Sync einen Ordner auswählen."
+                "Please go to Settings → Cloud Sync and select a folder."
             )
             return
         ok, msg = self._cloud_sync.export_to_cloud()
@@ -3456,12 +3462,12 @@ class MainWindow(QMainWindow):
             QMessageBox.information(
                 self, "Cloud Sync",
                 "Cloud-Ordner nicht konfiguriert.\n"
-                "Bitte unter Einstellungen → Cloud Sync einen Ordner auswählen."
+                "Please go to Settings → Cloud Sync and select a folder."
             )
             return
         reply = QMessageBox.question(
             self, "Cloud Import",
-            "Aktuelle Daten werden mit dem Cloud-Backup überschrieben.\n"
+            "Current data will be overwritten with cloud backup.\n"
             "Fortfahren?",
             QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
@@ -3574,13 +3580,13 @@ class MainWindow(QMainWindow):
         """Show about dialog."""
         QMessageBox.about(
             self,
-            "Über PyMon",
+            "About PyMon",
             "<h2>PyMon v0.2.0</h2>"
             "<p>EVE Online Character Monitor</p>"
-            "<p>Ein Python-Rewrite von EVEMon mit modernem ESI-API.</p>"
-            "<p>Features: ID→Name Auflösung, Portraits, Skill-Completion-Benachrichtigungen, "
-            "Killmail-Details, Wallet Transactions, Kontakte mit Namen, "
-            "Kalender, Research, Medaillen, System Tray u.v.m.</p>"
+            "<p>A Python rewrite of EVEMon with modern ESI API.</p>"
+            "<p>Features: ID→Name resolution, Portraits, Skill completion notifications, "
+            "Killmail details, Wallet Transactions, Contacts with names, "
+            "Calendar, Research, Medals, System Tray and more.</p>"
             "<p>API: <a href='https://esi.evetech.net'>ESI (EVE Swagger Interface)</a></p>"
             "<p>Lizenz: GPL v2</p>",
         )
@@ -3605,6 +3611,10 @@ class MainWindow(QMainWindow):
             return
 
         self.shutdown()
+        # Process pending events so timer stops are fully applied
+        # before super().closeEvent() destroys child widgets
+        from PySide6.QtWidgets import QApplication
+        QApplication.processEvents()
         super().closeEvent(event)
 
     def shutdown(self) -> None:

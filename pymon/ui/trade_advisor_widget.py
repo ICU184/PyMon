@@ -36,21 +36,21 @@ logger = logging.getLogger(__name__)
 
 def _fmt_isk(value: float) -> str:
     if value >= 1_000_000_000:
-        return f"{value / 1_000_000_000:,.2f} Mrd"
+        return f"{value / 1_000_000_000:,.2f} Bil"
     if value >= 1_000_000:
-        return f"{value / 1_000_000:,.2f} Mio"
+        return f"{value / 1_000_000:,.2f} Mil"
     if value >= 1_000:
         return f"{value:,.1f}"
     return f"{value:,.2f}"
 
 
 _REC_COLORS: dict[str, str] = {
-    "Sell Order aufgeben": Colors.GREEN,
-    "Sell Order aufgeben (gute Marge)": Colors.GREEN,
-    "Sofort verkaufen (Buy Order)": Colors.ACCENT,
-    "Verarbeiten (Reprocessing)": Colors.BLUE,
-    "Halten (kein Markt)": Colors.ORANGE,
-    "\u26a0\ufe0f Verlustgesch\u00e4ft \u2013 nicht verkaufen": Colors.RED,
+    "Place Sell Order": Colors.GREEN,
+    "Place Sell Order (good margin)": Colors.GREEN,
+    "Sell Immediately (Buy Order)": Colors.ACCENT,
+    "Reprocess": Colors.BLUE,
+    "Hold (no market)": Colors.ORANGE,
+    "\u26a0\ufe0f Loss making \u2013 do not sell": Colors.RED,
 }
 
 
@@ -84,7 +84,10 @@ class TradeAdvisorWidget(QWidget):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(0)
 
-        title = QLabel("\U0001f4a1 Handelsberater")
+        # ── Controls ──
+        ctrl_row = QHBoxLayout()
+
+        title = QLabel("\U0001f4a1 Trade Advisor")
         title.setProperty("cssClass", "widget-title")
         root.addWidget(title)
 
@@ -101,7 +104,7 @@ class TradeAdvisorWidget(QWidget):
             self._region_combo.addItem(name, rid)
         ctrl_row.addWidget(self._region_combo, 1)
 
-        self._refresh_btn = QPushButton("\u21bb Empfehlungen aktualisieren")
+        self._refresh_btn = QPushButton("\u21bb Update Recommendations")
         self._refresh_btn.setProperty("cssClass", "accent-button")
         self._refresh_btn.clicked.connect(self._on_refresh)
         ctrl_row.addWidget(self._refresh_btn)
@@ -109,14 +112,14 @@ class TradeAdvisorWidget(QWidget):
         content.addLayout(ctrl_row)
 
         # ── Summary KPIs ──
-        kpi_group = QGroupBox("Zusammenfassung")
+        kpi_group = QGroupBox("Summary")
         kpi_group.setProperty("cssClass", "market-card")
         kpi_layout = QHBoxLayout(kpi_group)
 
-        self._lbl_total_sell = self._make_kpi("Gesamtwert (Sell)", "---")
-        self._lbl_total_buy = self._make_kpi("Gesamtwert (Buy)", "---")
-        self._lbl_total_items = self._make_kpi("Ressourcen", "---")
-        self._lbl_best_action = self._make_kpi("Beste Aktion", "---")
+        self._lbl_total_sell = self._make_kpi("Total Value (Sell)", "---")
+        self._lbl_total_buy = self._make_kpi("Total Value (Buy)", "---")
+        self._lbl_total_items = self._make_kpi("Resources", "---")
+        self._lbl_best_action = self._make_kpi("Best Action", "---")
 
         for w in (self._lbl_total_sell, self._lbl_total_buy,
                   self._lbl_total_items, self._lbl_best_action):
@@ -124,7 +127,7 @@ class TradeAdvisorWidget(QWidget):
         content.addWidget(kpi_group)
 
         # ── Mining recommendations ──
-        mining_group = QGroupBox("\u26cf Mining-Erze")
+        mining_group = QGroupBox("\u26cf Mining Ores")
         mining_group.setProperty("cssClass", "market-card")
         mining_layout = QVBoxLayout(mining_group)
         mining_layout.setContentsMargins(4, 4, 4, 4)
@@ -134,7 +137,7 @@ class TradeAdvisorWidget(QWidget):
         content.addWidget(mining_group, 1)
 
         # ── Industry recommendations ──
-        industry_group = QGroupBox("\U0001f3ed Industrie-Produkte")
+        industry_group = QGroupBox("\U0001f3ed Industry Products")
         industry_group.setProperty("cssClass", "market-card")
         industry_layout = QVBoxLayout(industry_group)
         industry_layout.setContentsMargins(4, 4, 4, 4)
@@ -168,8 +171,8 @@ class TradeAdvisorWidget(QWidget):
         t = QTableWidget()
         t.setColumnCount(8)
         t.setHorizontalHeaderLabels([
-            "Item", "Menge", "Sell-Preis", "Wert (Sell)",
-            "Buy-Preis", "Tagesvolumen", "Marge %", "Empfehlung",
+            "Item", "Quantity", "Sell Price", "Value (Sell)",
+            "Buy Price", "Daily Volume", "Margin %", "Recommendation",
         ])
         rec_hdr = t.horizontalHeader()
         rec_hdr.setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
@@ -195,7 +198,7 @@ class TradeAdvisorWidget(QWidget):
         import threading
         region_id = self._region_combo.currentData() or THE_FORGE
         self._refresh_btn.setEnabled(False)
-        self._refresh_btn.setText("Laden\u2026")
+        self._refresh_btn.setText("Loading\u2026")
 
         def _worker() -> None:
             loop = asyncio.new_event_loop()
@@ -233,7 +236,7 @@ class TradeAdvisorWidget(QWidget):
     def _on_error(self) -> None:
         """Slot: called on main thread when an error occurs in worker."""
         self._refresh_btn.setEnabled(True)
-        self._refresh_btn.setText("\u21bb Empfehlungen aktualisieren")
+        self._refresh_btn.setText("\u21bb Update Recommendations")
 
     # ═══════════════════════════════════════════════════════════════
     #  Display
@@ -245,7 +248,7 @@ class TradeAdvisorWidget(QWidget):
         industry: list[TradeRecommendation],
     ) -> None:
         self._refresh_btn.setEnabled(True)
-        self._refresh_btn.setText("\u21bb Empfehlungen aktualisieren")
+        self._refresh_btn.setText("\u21bb Update Recommendations")
 
         all_recs = mining + industry
 

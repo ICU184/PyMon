@@ -396,7 +396,7 @@ class MarketBrowserWidget(QWidget):
                 loop.run_until_complete(self._fetch_and_display(type_id, region_id))
             except Exception as e:
                 logger.error("Market worker thread error: %s", e, exc_info=True)
-                self._error_occurred.emit(f"Fehler beim Laden: {e}")
+                self._error_occurred.emit(f"Error loading: {e}")
             finally:
                 loop.close()
 
@@ -527,7 +527,7 @@ class MarketBrowserWidget(QWidget):
                 if loc_id and loc_id >= 1_000_000_000_000:
                     return f"{sys_name} (Citadel)"
                 return sys_name
-        return f"Standort #{loc_id}" if loc_id else "?"
+        return f"Location #{loc_id}" if loc_id else "?"
 
     def _update_chart(self, history: list[PriceHistoryDay]) -> None:
         if not self._chart or not history:

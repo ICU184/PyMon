@@ -248,15 +248,15 @@ class CreateAppPage(QWizardPage):
         layout.addItem(QSpacerItem(0, 12, QSizePolicy.Minimum, QSizePolicy.Fixed))
 
         # Step-by-step instructions
-        layout.addWidget(_step_label(1, 'Click on <b>"Create New Application"</b>'))
-
-        layout.addWidget(_step_label(2, 'Name: Enter any name, e.g. <b>"PyMon"</b>'))
-
-        layout.addWidget(_step_label(3, 'Description: Can be left empty or e.g. <b>"Character Monitor"</b>'))
-
-        layout.addWidget(_step_label(4,
-            'Connection Type: Select <b>"Authentication & API Access"</b>'
+        layout.addWidget(_step_label(1,
+            'Log in with your <b>EVE Online account</b>'
         ))
+
+        layout.addWidget(_step_label(2, 'Click on <b>"Create New Application"</b>'))
+
+        layout.addWidget(_step_label(3, 'Name: Enter any name, e.g. <b>"PyMon"</b>'))
+
+        layout.addWidget(_step_label(4, 'Description: Can be left empty or e.g. <b>"Character Monitor"</b>'))
 
         layout.addWidget(_step_label(5,
             'Permissions: Click on <b>"Select All"</b> to activate all ESI scopes '
@@ -264,7 +264,7 @@ class CreateAppPage(QWizardPage):
         ))
 
         layout.addWidget(_step_label(6,
-            'Callback URL: Enter the following URL and press <b>"Add"</b>'
+            'Callback URL: Enter the following URL'
         ))
 
         # Callback URL with copy button
@@ -458,7 +458,7 @@ class SetupWizard(QWizard):
         super().__init__(parent)
         self.config = config
 
-        self.setWindowTitle("PyMon – Einrichtung")
+        self.setWindowTitle("PyMon – Setup")
         self.setMinimumSize(QSize(640, 560))
         self.setWizardStyle(QWizard.ModernStyle)
 

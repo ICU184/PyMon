@@ -85,7 +85,7 @@ class CloudSync:
 
         cloud_dir = Path(self.sync_folder) / "PyMon_Backup"
         if not cloud_dir.is_dir():
-            return False, f"Kein Backup gefunden in:\n{cloud_dir}"
+            return False, f"No backup found in:\n{cloud_dir}"
 
         dst = Path(self.data_dir)
         try:
@@ -103,7 +103,7 @@ class CloudSync:
 
             return True, (
                 f"{len(restored)} Dateien wiederhergestellt.\n"
-                "Bitte starte PyMon neu, damit die Änderungen wirksam werden."
+                "Please restart PyMon for the changes to take effect."
             )
         except Exception as e:
             logger.error("Cloud import failed", exc_info=True)

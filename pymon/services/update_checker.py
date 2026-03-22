@@ -17,7 +17,7 @@ from PySide6.QtWidgets import QDialog, QLabel, QPushButton, QVBoxLayout, QWidget
 logger = logging.getLogger(__name__)
 
 # GitHub repository for release checks
-GITHUB_REPO = "GeneraBlack/PyMon"
+GITHUB_REPO = "ICU184/PyMon"
 CURRENT_VERSION = "1.0.0"
 
 
@@ -86,22 +86,22 @@ class UpdateDialog(QDialog):
     ) -> None:
         super().__init__(parent)
         self.download_url = download_url
-        self.setWindowTitle("Update verfügbar")
+        self.setWindowTitle("Update Available")
         self.setMinimumWidth(380)
 
         layout = QVBoxLayout(self)
 
         layout.addWidget(QLabel(
-            f"<h3>🆕 Neue Version verfügbar</h3>"
-            f"<p>Aktuelle Version: <b>v{CURRENT_VERSION}</b></p>"
-            f"<p>Neueste Version: <b>{latest_version}</b></p>"
+            f"<h3>🆕 New Version Available</h3>"
+            f"<p>Current Version: <b>v{CURRENT_VERSION}</b></p>"
+            f"<p>Latest Version: <b>{latest_version}</b></p>"
         ))
 
-        dl_btn = QPushButton("⬇️ Download-Seite öffnen")
+        dl_btn = QPushButton("⬇️ Open Download Page")
         dl_btn.clicked.connect(self._open_download)
         layout.addWidget(dl_btn)
 
-        close_btn = QPushButton("Später")
+        close_btn = QPushButton("Later")
         close_btn.clicked.connect(self.close)
         layout.addWidget(close_btn)
 

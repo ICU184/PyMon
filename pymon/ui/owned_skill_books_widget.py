@@ -37,25 +37,25 @@ class OwnedSkillBooksWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
-        title = QLabel("📚 Skill Books im Besitz")
+        title = QLabel("📚 Owned Skill Books")
         title.setProperty("cssClass", "widget-title")
         layout.addWidget(title)
 
-        self._summary = QLabel("Lade Daten …")
+        self._summary = QLabel("Loading data... ")
         self._summary.setObjectName("summary")
         layout.addWidget(self._summary)
 
         # Search bar
         search_row = QHBoxLayout()
         self._search = QLineEdit()
-        self._search.setPlaceholderText("🔍 Skill Book suchen …")
+        self._search.setPlaceholderText("🔍 Search Skill Book...")
         self._search.textChanged.connect(self._apply_filter)
         search_row.addWidget(self._search)
         layout.addLayout(search_row)
 
         # Tree
         self._tree = QTreeWidget()
-        self._tree.setHeaderLabels(["Skill Book", "Gruppe", "Standort", "Menge", "Status"])
+        self._tree.setHeaderLabels(["Skill Book", "Group", "Location", "Quantity", "Status"])
         self._tree.setRootIsDecorated(False)
         self._tree.setAlternatingRowColors(True)
         header = self._tree.header()
@@ -112,9 +112,9 @@ class OwnedSkillBooksWidget(QWidget):
 
         total = len(self._all_items)
         self._summary.setText(
-            f"📚 {total} Skill Books gefunden  |  "
-            f"<span style='color:{Colors.RED}'>⬤</span> {n_not_injected} nicht injiziert  |  "
-            f"<span style='color:{Colors.ACCENT}'>⬤</span> {n_injected} bereits trainiert"
+            f"📚 {total} Skill Books found  |  "
+            f"<span style='color:{Colors.RED}'>⬤</span> {n_not_injected} not injected  |  "
+            f"<span style='color:{Colors.ACCENT}'>⬤</span> {n_injected} already trained"
         )
 
         self._populate_tree(self._all_items)
@@ -135,10 +135,10 @@ class OwnedSkillBooksWidget(QWidget):
             t = self.sde.get_type(type_id)
             if t:
                 group_id = t.get("group_id", 0)
-                return self.sde.get_group_name(group_id) or "Unbekannt"
+                return self.sde.get_group_name(group_id) or "Unknown"
         except Exception:
             pass
-        return "Unbekannt"
+        return "Unknown"
 
     def _populate_tree(self, items: list[tuple[str, str, str, int, bool]]) -> None:
         """Populate the tree widget with skill book items."""
@@ -152,11 +152,11 @@ class OwnedSkillBooksWidget(QWidget):
             item.setText(3, str(qty))
 
             if injected:
-                item.setText(4, "✓ Trainiert")
+                item.setText(4, "✓ Trained")
                 item.setForeground(4, QColor(Colors.ACCENT))
                 item.setForeground(0, QColor("#888"))
             else:
-                item.setText(4, "✗ Nicht injiziert")
+                item.setText(4, "✗ Not injected")
                 item.setForeground(4, QColor(Colors.RED))
                 f = QFont()
                 f.setBold(True)

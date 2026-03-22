@@ -21,6 +21,11 @@ a = Analysis(
         'pymon.services',
         'pymon.ui',
         # ── Qt extras ──
+        'PySide6',
+        'PySide6.QtCore',
+        'PySide6.QtGui',
+        'PySide6.QtWidgets',
+        'PySide6.QtNetwork',
         'PySide6.QtSvg',
         'PySide6.QtSvgWidgets',
         # ── HTTP / SSO / JWT ──

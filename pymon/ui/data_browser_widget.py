@@ -50,20 +50,20 @@ class DataBrowserWidget(QWidget):
         # Category filter
         filter_layout = QHBoxLayout()
         self.category_combo = QComboBox()
-        self.category_combo.addItem("Alle Kategorien", 0)
+        self.category_combo.addItem("All Categories", 0)
         self._load_categories()
         self.category_combo.currentIndexChanged.connect(self._on_category_changed)
         filter_layout.addWidget(self.category_combo)
 
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("Suche nach Name...")
+        self.search_input.setPlaceholderText("Search by name...")
         self.search_input.returnPressed.connect(self._on_search)
         filter_layout.addWidget(self.search_input)
         left_layout.addLayout(filter_layout)
 
         # Results tree
         self.result_tree = QTreeWidget()
-        self.result_tree.setHeaderLabels(["Name", "Typ-ID", "Gruppe"])
+        self.result_tree.setHeaderLabels(["Name", "Type-ID", "Group"])
         self.result_tree.setAlternatingRowColors(True)
         self.result_tree.header().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.result_tree.itemClicked.connect(self._on_item_selected)
@@ -79,7 +79,7 @@ class DataBrowserWidget(QWidget):
         self.detail_tabs = QTabWidget()
 
         # Info tab
-        self.info_label = QLabel("Wähle einen Gegenstand aus der Liste.")
+        self.info_label = QLabel("Select an item from the list.")
         self.info_label.setWordWrap(True)
         self.info_label.setTextFormat(Qt.TextFormat.RichText)
         self.info_label.setAlignment(Qt.AlignmentFlag.AlignTop)
@@ -92,7 +92,7 @@ class DataBrowserWidget(QWidget):
         self.dogma_label.setTextFormat(Qt.TextFormat.RichText)
         self.dogma_label.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.dogma_label.setContentsMargins(8, 8, 8, 8)
-        self.detail_tabs.addTab(self.dogma_label, "Attribute")
+        self.detail_tabs.addTab(self.dogma_label, "Attributes")
 
         # Blueprint tab
         self.bp_label = QLabel("")
@@ -204,7 +204,7 @@ class DataBrowserWidget(QWidget):
             self.result_tree.addTopLevelItem(item)
 
         if not results:
-            self.result_tree.addTopLevelItem(QTreeWidgetItem(["Keine Ergebnisse", "", ""]))
+            self.result_tree.addTopLevelItem(QTreeWidgetItem(["No results", "", ""]))
 
     def _on_item_selected(self, item: QTreeWidgetItem, column: int) -> None:
         """Show item details."""
@@ -222,7 +222,7 @@ class DataBrowserWidget(QWidget):
         """Show basic type info."""
         t = self.sde.get_type(type_id)
         if not t:
-            self.info_label.setText(f"<p>Typ #{type_id} nicht gefunden.</p>")
+            self.info_label.setText(f"<p>Type #{type_id} not found.</p>")
             return
 
         group = self.sde.get_group(t.get("group_id", 0))
@@ -232,24 +232,24 @@ class DataBrowserWidget(QWidget):
 
         html = f"<h2>{t.get('name_en', '?')}</h2>"
         html += "<table cellspacing='4'>"
-        html += f"<tr><td><b>Typ-ID:</b></td><td>{type_id}</td></tr>"
-        html += f"<tr><td><b>Gruppe:</b></td><td>{group_name}</td></tr>"
-        html += f"<tr><td><b>Kategorie:</b></td><td>{cat_name}</td></tr>"
+        html += f"<tr><td><b>Type-ID:</b></td><td>{type_id}</td></tr>"
+        html += f"<tr><td><b>Group:</b></td><td>{group_name}</td></tr>"
+        html += f"<tr><td><b>Category:</b></td><td>{cat_name}</td></tr>"
 
         if t.get("mass"):
-            html += f"<tr><td><b>Masse:</b></td><td>{t['mass']:,.0f} kg</td></tr>"
+            html += f"<tr><td><b>Mass:</b></td><td>{t['mass']:,.0f} kg</td></tr>"
         if t.get("volume"):
-            html += f"<tr><td><b>Volumen:</b></td><td>{t['volume']:,.2f} m³</td></tr>"
+            html += f"<tr><td><b>Volume:</b></td><td>{t['volume']:,.2f} m³</td></tr>"
         if t.get("base_price"):
-            html += f"<tr><td><b>Basispreis:</b></td><td>{t['base_price']:,.2f} ISK</td></tr>"
+            html += f"<tr><td><b>Base Price:</b></td><td>{t['base_price']:,.2f} ISK</td></tr>"
         if t.get("portion_size", 1) > 1:
             html += f"<tr><td><b>Portion Size:</b></td><td>{t['portion_size']}</td></tr>"
         if meta:
-            html += f"<tr><td><b>Meta-Gruppe:</b></td><td>{meta.get('name_en', '?')}</td></tr>"
+            html += f"<tr><td><b>Meta Group:</b></td><td>{meta.get('name_en', '?')}</td></tr>"
 
         market_group = self.sde.get_market_group(t.get("market_group_id", 0))
         if market_group:
-            html += f"<tr><td><b>Marktgruppe:</b></td><td>{market_group.get('name_en', '?')}</td></tr>"
+            html += f"<tr><td><b>Market Group:</b></td><td>{market_group.get('name_en', '?')}</td></tr>"
 
         html += "</table>"
 
@@ -261,14 +261,14 @@ class DataBrowserWidget(QWidget):
         role_bonuses = self.sde.get_type_role_bonuses(type_id)
         trait_bonuses = self.sde.get_type_trait_bonuses(type_id)
         if role_bonuses or trait_bonuses:
-            html += "<h3>Boni</h3>"
+            html += "<h3>Bonuses</h3>"
             if role_bonuses:
-                html += "<h4>Rollenboni</h4><ul>"
+                html += "<h4>Role Bonuses</h4><ul>"
                 for b in role_bonuses:
                     html += f"<li>{b.get('bonus_text_en', '?')}</li>"
                 html += "</ul>"
             if trait_bonuses:
-                html += "<h4>Skill-Boni</h4><ul>"
+                html += "<h4>Skill Bonuses</h4><ul>"
                 for b in trait_bonuses:
                     html += f"<li>{b.get('bonus_text_en', '?')}</li>"
                 html += "</ul>"
@@ -281,12 +281,12 @@ class DataBrowserWidget(QWidget):
         effects = self.sde.get_type_dogma_effects(type_id)
 
         if not attrs and not effects:
-            self.dogma_label.setText("<p>Keine Dogma-Attribute.</p>")
+            self.dogma_label.setText("<p>No Dogma attributes.</p>")
             return
 
-        html = f"<h3>Dogma-Attribute ({len(attrs)})</h3>"
+        html = f"<h3>Dogma Attributes ({len(attrs)})</h3>"
         html += "<table cellspacing='2'>"
-        html += "<tr><th>Attribut</th><th>Wert</th></tr>"
+        html += "<tr><th>Attribute</th><th>Value</th></tr>"
         for a in sorted(attrs, key=lambda x: x.get("name", "")):
             attr_name = a.get("name", f"#{a['attribute_id']}")
             display = self.sde.get_dogma_attribute(a["attribute_id"])
@@ -301,7 +301,7 @@ class DataBrowserWidget(QWidget):
         html += "</table>"
 
         if effects:
-            html += f"<h3>Dogma-Effekte ({len(effects)})</h3><ul>"
+            html += f"<h3>Dogma Effects ({len(effects)})</h3><ul>"
             for e in effects:
                 eff = self.sde.get_dogma_effect(e["effect_id"])
                 eff_name = eff.get("display_name_en", eff.get("name", f"#{e['effect_id']}")) if eff else f"#{e['effect_id']}"
@@ -323,18 +323,18 @@ class DataBrowserWidget(QWidget):
                     type_id = bp_info["type_id"]
 
         if not bp:
-            self.bp_label.setText("<p>Kein zugehöriger Blueprint.</p>")
+            self.bp_label.setText("<p>No associated Blueprint.</p>")
             return
 
         bp_name = self.sde.get_type_name(type_id) or f"Blueprint #{type_id}"
         html = f"<h3>{bp_name}</h3><table cellspacing='4'>"
         html += f"<tr><td><b>Max Runs:</b></td><td>{bp.get('max_production_limit', '?')}</td></tr>"
 
-        for key, label in [("manufacturing_time", "Herstellungszeit"),
-                           ("research_material_time", "ME-Forschungszeit"),
-                           ("research_time_time", "TE-Forschungszeit"),
-                           ("copying_time", "Kopierzeit"),
-                           ("invention_time", "Erfindungszeit")]:
+        for key, label in [("manufacturing_time", "Manufacturing Time"),
+                           ("research_material_time", "ME Research Time"),
+                           ("research_time_time", "TE Research Time"),
+                           ("copying_time", "Copying Time"),
+                           ("invention_time", "Invention Time")]:
             val = bp.get(key)
             if val:
                 minutes = val // 60
@@ -344,8 +344,8 @@ class DataBrowserWidget(QWidget):
         # Materials
         materials = self.sde.get_blueprint_materials(type_id)
         if materials:
-            html += "<h4>Materialien</h4><table>"
-            html += "<tr><th>Material</th><th>Menge</th></tr>"
+            html += "<h4>Materials</h4><table>"
+            html += "<tr><th>Material</th><th>Quantity</th></tr>"
             for m in materials:
                 mat_name = self.sde.get_type_name(m["material_type_id"]) or f"#{m['material_type_id']}"
                 html += f"<tr><td>{mat_name}</td><td>{m['quantity']:,}</td></tr>"
@@ -354,8 +354,8 @@ class DataBrowserWidget(QWidget):
         # Products
         products = self.sde.get_blueprint_products(type_id)
         if products:
-            html += "<h4>Produkte</h4><table>"
-            html += "<tr><th>Produkt</th><th>Menge</th></tr>"
+            html += "<h4>Products</h4><table>"
+            html += "<tr><th>Product</th><th>Quantity</th></tr>"
             for p in products:
                 prod_name = self.sde.get_type_name(p["product_type_id"]) or f"#{p['product_type_id']}"
                 html += f"<tr><td>{prod_name}</td><td>{p['quantity']:,}</td></tr>"
@@ -365,7 +365,7 @@ class DataBrowserWidget(QWidget):
         inv = self.sde.get_blueprint_invention_products(type_id)
         if inv:
             html += "<h4>Invention</h4><table>"
-            html += "<tr><th>Blueprint</th><th>Menge</th><th>Chance</th></tr>"
+            html += "<tr><th>Blueprint</th><th>Quantity</th><th>Chance</th></tr>"
             for i in inv:
                 inv_name = self.sde.get_type_name(i["product_type_id"]) or f"#{i['product_type_id']}"
                 chance = i.get("probability", 0) * 100
@@ -378,11 +378,11 @@ class DataBrowserWidget(QWidget):
         """Show reprocessing materials."""
         materials = self.sde.get_type_materials(type_id)
         if not materials:
-            self.repro_label.setText("<p>Nicht reprocessbar.</p>")
+            self.repro_label.setText("<p>Not reprocessable.</p>")
             return
 
         html = "<h3>Reprocessing</h3><table>"
-        html += "<tr><th>Material</th><th>Menge</th></tr>"
+        html += "<tr><th>Material</th><th>Quantity</th></tr>"
         for m in materials:
             mat_name = self.sde.get_type_name(m["material_type_id"]) or f"#{m['material_type_id']}"
             html += f"<tr><td>{mat_name}</td><td>{m['quantity']:,}</td></tr>"

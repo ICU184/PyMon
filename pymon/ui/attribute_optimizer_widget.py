@@ -34,10 +34,10 @@ _TOTAL_POINTS = _BASE_POINTS * 5 + _DISTRIBUTABLE  # 85 + 14 = 99
 
 _ATTR_NAMES = ["perception", "memory", "willpower", "intelligence", "charisma"]
 _ATTR_LABELS = {
-    "perception": "Wahrnehmung",
-    "memory": "Gedächtnis",
-    "willpower": "Willenskraft",
-    "intelligence": "Intelligenz",
+    "perception": "Perception",
+    "memory": "Memory",
+    "willpower": "Willpower",
+    "intelligence": "Intelligence",
     "charisma": "Charisma",
 }
 
@@ -76,7 +76,7 @@ class AttributeOptimizerWidget(QWidget):
         layout.setContentsMargins(8, 8, 8, 8)
 
         # ── Current Attributes ──
-        current_group = QGroupBox("Aktuelle Attribute")
+        current_group = QGroupBox("Current Attributes")
         current_layout = QVBoxLayout(current_group)
 
         self._current_bars: dict[str, tuple[QLabel, QProgressBar, QLabel]] = {}
@@ -104,7 +104,7 @@ class AttributeOptimizerWidget(QWidget):
         layout.addWidget(current_group)
 
         # ── Optimal Attributes ──
-        optimal_group = QGroupBox("Optimale Attribute (für aktuellen Plan)")
+        optimal_group = QGroupBox("Optimal Attributes (for current plan)")
         optimal_layout = QVBoxLayout(optimal_group)
 
         self._optimal_bars: dict[str, tuple[QLabel, QProgressBar, QLabel]] = {}
@@ -127,7 +127,7 @@ class AttributeOptimizerWidget(QWidget):
             optimal_layout.addLayout(row)
             self._optimal_bars[attr] = (name_label, bar, val_label)
 
-        self._optimal_sp_label = QLabel("SP/Stunde (optimal): —")
+        self._optimal_sp_label = QLabel("SP/Hour (optimal): —")
         self._optimal_sp_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
         optimal_layout.addWidget(self._optimal_sp_label)
 
@@ -139,19 +139,19 @@ class AttributeOptimizerWidget(QWidget):
         layout.addWidget(optimal_group)
 
         # ── Remap Summary ──
-        summary_group = QGroupBox("Remap-Zusammenfassung")
+        summary_group = QGroupBox("Remap Summary")
         summary_layout = QVBoxLayout(summary_group)
         self._summary_label = QLabel(
-            "<p>Füge Skills zum Plan hinzu, um die optimale Attributverteilung zu berechnen.</p>"
-            "<p style='color:{Colors.TEXT_DIM}'>Ein Neural Remap kann einmal pro Jahr durchgeführt werden. "
-            "Zusätzlich können bis zu 2 Bonus-Remaps gespeichert werden.</p>"
+            "<p>Add skills to the plan to calculate the optimal attribute distribution.</p>"
+            "<p style='color:{Colors.TEXT_DIM}'>A Neural Remap can be performed once per year. "
+            "Additionally, up to 2 bonus remaps can be stored.</p>"
         )
         self._summary_label.setWordWrap(True)
         self._summary_label.setTextFormat(Qt.TextFormat.RichText)
         summary_layout.addWidget(self._summary_label)
 
         # Calculate button
-        calc_btn = QPushButton("🔄 Optimal berechnen")
+        calc_btn = QPushButton("🔄 Calculate Optimal")
         calc_btn.clicked.connect(self._calculate_optimal)
         summary_layout.addWidget(calc_btn)
 
@@ -169,15 +169,15 @@ class AttributeOptimizerWidget(QWidget):
         # Calculate current SP/hour for the plan
         if self._plan and self._plan.entries:
             sp_h = self._calc_plan_sp_per_hour(self._attributes)
-            self._sp_per_hour_label.setText(f"SP/Stunde: {sp_h:,.0f}")
+            self._sp_per_hour_label.setText(f"SP/Hour: {sp_h:,.0f}")
         else:
-            self._sp_per_hour_label.setText("SP/Stunde: —")
+            self._sp_per_hour_label.setText("SP/Hour: —")
 
     def _calculate_optimal(self) -> None:
         """Calculate optimal attribute distribution for the current plan."""
         if not self._plan or not self._plan.entries:
             self._improvement_label.setText(
-                "<p style='color:{Colors.TEXT_DIM}'>Kein Plan vorhanden – füge Skills hinzu.</p>"
+                "<p style='color:{Colors.TEXT_DIM}'>No plan available – add skills to plan.</p>"
             )
             return
 
@@ -249,7 +249,7 @@ class AttributeOptimizerWidget(QWidget):
         current_sp_h = self._calc_plan_sp_per_hour(self._attributes)
         optimal_sp_h = self._calc_plan_sp_per_hour(optimal)
 
-        self._optimal_sp_label.setText(f"SP/Stunde (optimal): {optimal_sp_h:,.0f}")
+        self._optimal_sp_label.setText(f"SP/Hour (optimal): {optimal_sp_h:,.0f}")
 
         if current_sp_h > 0:
             improvement = ((optimal_sp_h - current_sp_h) / current_sp_h) * 100
@@ -264,12 +264,12 @@ class AttributeOptimizerWidget(QWidget):
 
             color = Colors.ACCENT if improvement > 0 else Colors.RED
             html = (
-                f"<p>Verbesserung: <b style='color:{color}'>{improvement:+.1f}%</b></p>"
-                f"<p>Aktuelle Planzeit: {format_training_time(time_current)}</p>"
-                f"<p>Optimale Planzeit: {format_training_time(time_optimal)}</p>"
+                f"<p>Improvement: <b style='color:{color}'>{improvement:+.1f}%</b></p>"
+                f"<p>Current Plan Time: {format_training_time(time_current)}</p>"
+                f"<p>Optimal Plan Time: {format_training_time(time_optimal)}</p>"
             )
             if time_saved > 0:
-                html += f"<p style='color:{Colors.ACCENT}'><b>Zeitersparnis: {format_training_time(time_saved)}</b></p>"
+                html += f"<p style='color:{Colors.ACCENT}'><b>Time Saved: {format_training_time(time_saved)}</b></p>"
             self._improvement_label.setText(html)
 
             # Update summary
@@ -281,12 +281,12 @@ class AttributeOptimizerWidget(QWidget):
                     changes.append(f"{_ATTR_LABELS[attr]}: {self._attributes.get(attr, _BASE_POINTS)} → {optimal[attr]} ({direction}{abs(diff)})")
 
             if changes:
-                summary = "<p><b>Empfohlene Änderungen:</b></p><ul>"
+                summary = "<p><b>Recommended Changes:</b></p><ul>"
                 for c in changes:
                     summary += f"<li>{c}</li>"
                 summary += "</ul>"
             else:
-                summary = "<p style='color:{Colors.ACCENT}'>✓ Deine aktuellen Attribute sind bereits optimal für diesen Plan!</p>"
+                summary = "<p style='color:{Colors.ACCENT}'>✓ Your current attributes are already optimal for this plan!</p>"
             self._summary_label.setText(summary)
         else:
             self._improvement_label.setText("")

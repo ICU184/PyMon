@@ -82,10 +82,10 @@ class SortableTableWidget(QWidget):
 
         # Toolbar row
         toolbar = QHBoxLayout()
-        toolbar.addWidget(QLabel("Gruppieren:"))
+        toolbar.addWidget(QLabel("Group by:"))
         self.group_combo = QComboBox()
         self.group_combo.setMaximumWidth(200)
-        self.group_combo.addItem("— Keine —", -1)
+        self.group_combo.addItem("— None —", -1)
         for i, col in enumerate(self._all_columns):
             self.group_combo.addItem(col, i)
         self.group_combo.currentIndexChanged.connect(self._on_group_changed)
@@ -233,7 +233,7 @@ class SortableTableWidget(QWidget):
             menu.addAction(action)
 
         menu.addSeparator()
-        reset_action = QAction("Alle Spalten anzeigen", self)
+        reset_action = QAction("Show all columns", self)
         reset_action.triggered.connect(self._reset_columns)
         menu.addAction(reset_action)
 

@@ -172,7 +172,7 @@ class PathFinderWidget(QWidget):
         layout.setContentsMargins(8, 8, 8, 8)
 
         # Title
-        title = QLabel("<h3>🗺️ Path Finder – Routenplanung</h3>")
+        title = QLabel("<h3>🗺️ Path Finder – Route Planning</h3>")
         title.setTextFormat(Qt.TextFormat.RichText)
         layout.addWidget(title)
 
@@ -188,21 +188,21 @@ class PathFinderWidget(QWidget):
         input_group = QGroupBox("Route")
         input_layout = QHBoxLayout(input_group)
 
-        input_layout.addWidget(QLabel("Von:"))
+        input_layout.addWidget(QLabel("From:"))
         self.from_input = QLineEdit()
-        self.from_input.setPlaceholderText("System-Name (z.B. Jita)")
+        self.from_input.setPlaceholderText("System Name (e.g. Jita)")
         self.from_input.setCompleter(completer_from)
         self.from_input.returnPressed.connect(self._on_find)
         input_layout.addWidget(self.from_input, stretch=1)
 
-        input_layout.addWidget(QLabel("Nach:"))
+        input_layout.addWidget(QLabel("To:"))
         self.to_input = QLineEdit()
-        self.to_input.setPlaceholderText("System-Name (z.B. Amarr)")
+        self.to_input.setPlaceholderText("System Name (e.g. Amarr)")
         self.to_input.setCompleter(completer_to)
         self.to_input.returnPressed.connect(self._on_find)
         input_layout.addWidget(self.to_input, stretch=1)
 
-        self.find_btn = QPushButton("🔍 Route finden")
+        self.find_btn = QPushButton("🔍 Find Route")
         self.find_btn.clicked.connect(self._on_find)
         input_layout.addWidget(self.find_btn)
 
@@ -210,13 +210,13 @@ class PathFinderWidget(QWidget):
 
         # Security filter
         sec_layout = QHBoxLayout()
-        sec_layout.addWidget(QLabel("Präferenz:"))
-        self.radio_shortest = QRadioButton("Kürzeste Route")
+        sec_layout.addWidget(QLabel("Preference:"))
+        self.radio_shortest = QRadioButton("Shortest Route")
         self.radio_shortest.setChecked(True)
         sec_layout.addWidget(self.radio_shortest)
-        self.radio_highsec = QRadioButton("Highsec bevorzugt (≥ 0.5)")
+        self.radio_highsec = QRadioButton("Prefer Highsec (≥ 0.5)")
         sec_layout.addWidget(self.radio_highsec)
-        self.radio_safe = QRadioButton("Nur Highsec")
+        self.radio_safe = QRadioButton("Highsec Only")
         sec_layout.addWidget(self.radio_safe)
         sec_layout.addStretch()
         layout.addLayout(sec_layout)
@@ -226,7 +226,7 @@ class PathFinderWidget(QWidget):
 
         # Summary
         self.summary_label = QLabel(
-            "<p style='color:{Colors.TEXT_DIM}'>Gib Start- und Ziel-System ein, um eine Route zu berechnen.</p>"
+            "<p style='color:{Colors.TEXT_DIM}'>Enter start and destination system to calculate a route.</p>"
         )
         self.summary_label.setWordWrap(True)
         self.summary_label.setTextFormat(Qt.TextFormat.RichText)
@@ -236,7 +236,7 @@ class PathFinderWidget(QWidget):
         self.route_table = QTableWidget()
         self.route_table.setColumnCount(6)
         self.route_table.setHorizontalHeaderLabels([
-            "#", "System", "Security", "Region", "Konstellation", "Sprünge übrig"
+            "#", "System", "Security", "Region", "Constellation", "Jumps Left"
         ])
         self.route_table.setAlternatingRowColors(True)
         self.route_table.verticalHeader().setVisible(False)
@@ -260,7 +260,7 @@ class PathFinderWidget(QWidget):
 
         if not from_name or not to_name:
             self.summary_label.setText(
-                "<p style='color:{Colors.ORANGE}'>Bitte Start- und Ziel-System eingeben.</p>"
+                "<p style='color:{Colors.ORANGE}'>Please enter start and destination system.</p>"
             )
             return
 
@@ -285,12 +285,12 @@ class PathFinderWidget(QWidget):
 
         if start_id is None:
             self.summary_label.setText(
-                f"<p style='color:{Colors.RED}'>System '{from_name}' nicht gefunden.</p>"
+                f"<p style='color:{Colors.RED}'>System '{from_name}' not found.</p>"
             )
             return
         if end_id is None:
             self.summary_label.setText(
-                f"<p style='color:{Colors.RED}'>System '{to_name}' nicht gefunden.</p>"
+                f"<p style='color:{Colors.RED}'>System '{to_name}' not found.</p>"
             )
             return
 
@@ -307,9 +307,9 @@ class PathFinderWidget(QWidget):
         if path is None:
             fallback = ""
             if avoid_low or avoid_null:
-                fallback = "<br><i>Versuche 'Kürzeste Route' — möglicherweise gibt es keinen sicheren Weg.</i>"
+                fallback = "<br><i>Try 'Shortest Route' — there might be no safe path.</i>"
             self.summary_label.setText(
-                f"<p style='color:{Colors.RED}'>Keine Route von {from_name} nach {to_name} gefunden.{fallback}</p>"
+                f"<p style='color:{Colors.RED}'>No route from {from_name} to {to_name} found.{fallback}</p>"
             )
             self.route_table.setRowCount(0)
             return
@@ -332,7 +332,7 @@ class PathFinderWidget(QWidget):
 
         self.summary_label.setText(
             f"<h4>Route: {from_name} → {to_name} — "
-            f"<span style='color:{Colors.BLUE}'>{jumps} Sprünge</span></h4>"
+            f"<span style='color:{Colors.BLUE}'>{jumps} Jumps</span></h4>"
             f"<p>{' | '.join(sec_summary)}</p>"
         )
 
