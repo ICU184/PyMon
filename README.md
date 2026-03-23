@@ -76,7 +76,7 @@ Built with **Python 3.11+** and **PySide6 (Qt 6)**, PyMon provides a dark-themed
 
 ### Option A: Windows Installer (recommended for users)
 
-1. Go to [**Releases**](https://github.com/GeneraBlack/PyMon/releases/latest)
+1. Go to [**Releases**](***PLACE EXE HERE***)
 2. Download one of the two variants:
    - **`PyMon-x.x.x-Setup.exe`** – Installer with Start Menu entry, Desktop shortcut & optional autostart
    - **`PyMon-x.x.x-Windows-Portable.zip`** – Portable version (simply extract and run)
